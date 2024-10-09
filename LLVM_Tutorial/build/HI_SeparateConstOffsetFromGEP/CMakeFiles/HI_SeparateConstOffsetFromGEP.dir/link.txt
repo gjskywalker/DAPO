@@ -1,0 +1,2 @@
+/usr/local/bin/llvm-ar qc libHI_SeparateConstOffsetFromGEP.a CMakeFiles/HI_SeparateConstOffsetFromGEP.dir/HI_SeparateConstOffsetFromGEP.cc.o
+/usr/local/bin/llvm-ranlib libHI_SeparateConstOffsetFromGEP.a

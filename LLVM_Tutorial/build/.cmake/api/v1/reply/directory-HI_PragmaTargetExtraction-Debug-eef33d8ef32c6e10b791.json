@@ -1,0 +1,14 @@
+{
+	"backtraceGraph" : 
+	{
+		"commands" : [],
+		"files" : [],
+		"nodes" : []
+	},
+	"installers" : [],
+	"paths" : 
+	{
+		"build" : "HI_PragmaTargetExtraction",
+		"source" : "HI_PragmaTargetExtraction"
+	}
+}

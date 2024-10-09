@@ -1,0 +1,2 @@
+/usr/local/bin/llvm-ar qc libHI_MulOrderOpt.a CMakeFiles/HI_MulOrderOpt.dir/HI_MulOrderOpt.cc.o
+/usr/local/bin/llvm-ranlib libHI_MulOrderOpt.a

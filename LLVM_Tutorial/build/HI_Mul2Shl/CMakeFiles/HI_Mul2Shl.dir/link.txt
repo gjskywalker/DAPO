@@ -1,0 +1,2 @@
+/usr/local/bin/llvm-ar qc libHI_Mul2Shl.a CMakeFiles/HI_Mul2Shl.dir/HI_Mul2Shl.cc.o
+/usr/local/bin/llvm-ranlib libHI_Mul2Shl.a

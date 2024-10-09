@@ -1,0 +1,14 @@
+{
+	"backtraceGraph" : 
+	{
+		"commands" : [],
+		"files" : [],
+		"nodes" : []
+	},
+	"installers" : [],
+	"paths" : 
+	{
+		"build" : "HI_MuxInsertionArrayPartition",
+		"source" : "HI_MuxInsertionArrayPartition"
+	}
+}

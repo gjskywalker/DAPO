@@ -1,0 +1,2 @@
+/usr/local/bin/llvm-ar qc libHI_APIntSrcAnalysis.a CMakeFiles/HI_APIntSrcAnalysis.dir/HI_APIntSrcAnalysis.cc.o
+/usr/local/bin/llvm-ranlib libHI_APIntSrcAnalysis.a

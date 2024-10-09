@@ -1,0 +1,2 @@
+/usr/local/bin/llvm-ar qc libHI_VarWidthReduce.a CMakeFiles/HI_VarWidthReduce.dir/HI_VarWidthReduce.cc.o
+/usr/local/bin/llvm-ranlib libHI_VarWidthReduce.a

@@ -1,0 +1,2 @@
+/usr/local/bin/llvm-ar qc libHI_StringProcess.a CMakeFiles/HI_StringProcess.dir/HI_StringProcess.cc.o CMakeFiles/HI_StringProcess.dir/tempCodeRunnerFile.cpp.o CMakeFiles/HI_StringProcess.dir/test.cpp.o
+/usr/local/bin/llvm-ranlib libHI_StringProcess.a

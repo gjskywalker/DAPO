@@ -1,0 +1,2 @@
+/usr/local/bin/llvm-ar qc libHI_LoopDependenceAnalysis.a CMakeFiles/HI_LoopDependenceAnalysis.dir/HI_LoopDependenceAnalysis.cc.o
+/usr/local/bin/llvm-ranlib libHI_LoopDependenceAnalysis.a

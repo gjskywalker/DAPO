@@ -1,0 +1,14 @@
+{
+	"backtraceGraph" : 
+	{
+		"commands" : [],
+		"files" : [],
+		"nodes" : []
+	},
+	"installers" : [],
+	"paths" : 
+	{
+		"build" : "HI_APIntSrcAnalysis",
+		"source" : "HI_APIntSrcAnalysis"
+	}
+}

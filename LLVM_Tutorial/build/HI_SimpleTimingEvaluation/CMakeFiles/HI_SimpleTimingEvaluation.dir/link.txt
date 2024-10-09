@@ -1,0 +1,2 @@
+/usr/local/bin/llvm-ar qc libHI_SimpleTimingEvaluation.a CMakeFiles/HI_SimpleTimingEvaluation.dir/HI_SimpleTimingEvaluation.cc.o CMakeFiles/HI_SimpleTimingEvaluation.dir/HI_SimpleTimingEvaluation_BlockLatency.cc.o CMakeFiles/HI_SimpleTimingEvaluation.dir/HI_SimpleTimingEvaluation_FunctionLatency.cc.o CMakeFiles/HI_SimpleTimingEvaluation.dir/HI_SimpleTimingEvaluation_LoopLatency.cc.o
+/usr/local/bin/llvm-ranlib libHI_SimpleTimingEvaluation.a

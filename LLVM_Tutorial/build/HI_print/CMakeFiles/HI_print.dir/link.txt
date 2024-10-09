@@ -1,0 +1,2 @@
+/usr/local/bin/llvm-ar qc libHI_print.a CMakeFiles/HI_print.dir/HI_print.cc.o
+/usr/local/bin/llvm-ranlib libHI_print.a

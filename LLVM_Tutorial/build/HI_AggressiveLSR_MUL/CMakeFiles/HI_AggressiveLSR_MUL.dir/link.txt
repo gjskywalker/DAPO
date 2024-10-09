@@ -1,0 +1,2 @@
+/usr/local/bin/llvm-ar qc libHI_AggressiveLSR_MUL.a CMakeFiles/HI_AggressiveLSR_MUL.dir/HI_AggressiveLSR_MUL.cc.o
+/usr/local/bin/llvm-ranlib libHI_AggressiveLSR_MUL.a

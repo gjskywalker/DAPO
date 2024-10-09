@@ -1,0 +1,2 @@
+/usr/local/bin/llvm-ar qc libHI_IR2SourceCode.a CMakeFiles/HI_IR2SourceCode.dir/HI_IR2SourceCode.cc.o
+/usr/local/bin/llvm-ranlib libHI_IR2SourceCode.a

@@ -1,0 +1,2 @@
+/usr/local/bin/llvm-ar qc libHI_FunctionInterfaceInfo.a CMakeFiles/HI_FunctionInterfaceInfo.dir/HI_FunctionInterfaceInfo.cc.o
+/usr/local/bin/llvm-ranlib libHI_FunctionInterfaceInfo.a

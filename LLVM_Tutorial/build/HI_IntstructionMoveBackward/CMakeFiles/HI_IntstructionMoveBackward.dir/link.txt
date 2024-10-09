@@ -1,0 +1,2 @@
+/usr/local/bin/llvm-ar qc libHI_IntstructionMoveBackward.a CMakeFiles/HI_IntstructionMoveBackward.dir/HI_IntstructionMoveBackward.cc.o
+/usr/local/bin/llvm-ranlib libHI_IntstructionMoveBackward.a

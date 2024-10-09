@@ -1,0 +1,2 @@
+/usr/local/bin/llvm-ar qc libHI_GEP_OffsetCombine.a CMakeFiles/HI_GEP_OffsetCombine.dir/HI_GEP_OffsetCombine.cc.o
+/usr/local/bin/llvm-ranlib libHI_GEP_OffsetCombine.a

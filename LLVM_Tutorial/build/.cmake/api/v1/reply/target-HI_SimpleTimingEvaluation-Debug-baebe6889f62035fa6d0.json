@@ -1,0 +1,101 @@
+{
+	"archive" : {},
+	"artifacts" : 
+	[
+		{
+			"path" : "HI_SimpleTimingEvaluation/libHI_SimpleTimingEvaluation.a"
+		}
+	],
+	"backtrace" : 1,
+	"backtraceGraph" : 
+	{
+		"commands" : 
+		[
+			"add_library"
+		],
+		"files" : 
+		[
+			"HI_SimpleTimingEvaluation/CMakeLists.txt"
+		],
+		"nodes" : 
+		[
+			{
+				"file" : 0
+			},
+			{
+				"command" : 0,
+				"file" : 0,
+				"line" : 14,
+				"parent" : 0
+			}
+		]
+	},
+	"compileGroups" : 
+	[
+		{
+			"compileCommandFragments" : 
+			[
+				{
+					"fragment" : " -fno-rtti -std=c++17 -fno-rtti -std=c++17 -g   -D_GNU_SOURCE -D_DEBUG -D_GLIBCXX_ASSERTIONS -D__STDC_CONSTANT_MACROS -D__STDC_FORMAT_MACROS -D__STDC_LIMIT_MACROS -D_GNU_SOURCE -D_DEBUG -D_GLIBCXX_ASSERTIONS -D__STDC_CONSTANT_MACROS -D__STDC_FORMAT_MACROS -D__STDC_LIMIT_MACROS"
+				}
+			],
+			"language" : "CXX",
+			"sourceIndexes" : 
+			[
+				0,
+				1,
+				2,
+				3
+			]
+		}
+	],
+	"id" : "HI_SimpleTimingEvaluation::@a6b28b905d67ed006427",
+	"name" : "HI_SimpleTimingEvaluation",
+	"nameOnDisk" : "libHI_SimpleTimingEvaluation.a",
+	"paths" : 
+	{
+		"build" : "HI_SimpleTimingEvaluation",
+		"source" : "HI_SimpleTimingEvaluation"
+	},
+	"sourceGroups" : 
+	[
+		{
+			"name" : "Source Files",
+			"sourceIndexes" : 
+			[
+				0,
+				1,
+				2,
+				3
+			]
+		}
+	],
+	"sources" : 
+	[
+		{
+			"backtrace" : 1,
+			"compileGroupIndex" : 0,
+			"path" : "HI_SimpleTimingEvaluation/HI_SimpleTimingEvaluation.cc",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 1,
+			"compileGroupIndex" : 0,
+			"path" : "HI_SimpleTimingEvaluation/HI_SimpleTimingEvaluation_BlockLatency.cc",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 1,
+			"compileGroupIndex" : 0,
+			"path" : "HI_SimpleTimingEvaluation/HI_SimpleTimingEvaluation_FunctionLatency.cc",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 1,
+			"compileGroupIndex" : 0,
+			"path" : "HI_SimpleTimingEvaluation/HI_SimpleTimingEvaluation_LoopLatency.cc",
+			"sourceGroupIndex" : 0
+		}
+	],
+	"type" : "STATIC_LIBRARY"
+}

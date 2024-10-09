@@ -1,0 +1,41 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+      {
+        "name": "C/C++ Runner: Debug Session",
+        "type": "cppdbg",
+        "request": "launch",
+        "args": [
+          ".",
+          "random0",
+          "random0.bc",
+        ],
+        "stopAtEntry": false,
+        "externalConsole": false,
+        "cwd": "/home/eeuser/Desktop/GRL-HLS/LLVM_Tutorial/Tests/FeatureExtractor/build",
+        "program": "/home/eeuser/Desktop/GRL-HLS/LLVM_Tutorial/Tests/FeatureExtractor/build/FeatureExtractor_V4",
+        "MIMode": "gdb",
+        "miDebuggerPath": "gdb",
+        "setupCommands": [
+          {
+            "description": "Enable pretty-printing for gdb",
+            "text": "-enable-pretty-printing",
+            "ignoreFailures": true
+          }
+        ]
+      }
+    ]
+  }
+  // {
+  //   "configurations": [
+  //     {
+  //       "name": "Python: Current File",
+  //       "type": "python",
+  //       "request": "launch",
+  //       "args": ["--DS PROTEINS","--lr 0.01","--local","--num-gc-layers 3", "--aug random2","--seed $seed"],
+  //       "program": "GraphCL/unsupervised_TU/gsimclr.py",
+  //       "console": "integratedTerminal",
+  //       "justMyCode": true
+  //     }
+  //   ]
+  // }

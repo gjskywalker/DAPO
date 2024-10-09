@@ -302,7 +302,7 @@ APInt HI_ConstantOffsetExtractor::findInEitherOperand(BinaryOperator *BO, bool S
 
 APInt HI_ConstantOffsetExtractor::find(Value *V, bool SignExtended, bool ZeroExtended, bool NonNegative)
 {
-    // TODO(jingyue): We could trace into integer/pointer casts, such as
+    // We could trace into integer/pointer casts, such as
     // inttoptr, ptrtoint, bitcast, and addrspacecast. We choose to handle only
     // integers because it gives good enough results for our benchmarks.
     unsigned BitWidth = cast<IntegerType>(V->getType())->getBitWidth();
@@ -898,7 +898,7 @@ bool HI_SeparateConstOffsetFromGEP::splitGEP(GetElementPtrInst *GEP)
     // address with silently-wrapping two's complement arithmetic".
     // Therefore, the final code will be a semantically equivalent.
     //
-    // TODO(jingyue): do some range analysis to keep as many inbounds as
+    // : do some range analysis to keep as many inbounds as
     // possible. GEPs with inbounds are more friendly to alias analysis.
     bool GEPWasInBounds = GEP->isInBounds();
     GEP->setIsInBounds(false);

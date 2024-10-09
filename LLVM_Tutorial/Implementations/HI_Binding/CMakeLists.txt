@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.10)
 
 
-find_package(LLVM REQUIRED CONFIG PATHS /home/x2/jinming-ge/llvm-16/lib/cmake/llvm NO_DEFAULT_PATH)
+find_package(LLVM REQUIRED CONFIG PATHS)
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fno-rtti -std=c++17")
 

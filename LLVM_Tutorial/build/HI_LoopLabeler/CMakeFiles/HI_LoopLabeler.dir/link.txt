@@ -1,2 +1,0 @@
-/usr/local/bin/llvm-ar qc libHI_LoopLabeler.a CMakeFiles/HI_LoopLabeler.dir/HI_LoopLabeler.cc.o
-/usr/local/bin/llvm-ranlib libHI_LoopLabeler.a

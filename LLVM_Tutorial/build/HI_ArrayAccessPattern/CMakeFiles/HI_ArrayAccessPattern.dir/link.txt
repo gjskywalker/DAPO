@@ -1,2 +1,0 @@
-/usr/local/bin/llvm-ar qc libHI_ArrayAccessPattern.a CMakeFiles/HI_ArrayAccessPattern.dir/HI_ArrayAccessPattern.cc.o
-/usr/local/bin/llvm-ranlib libHI_ArrayAccessPattern.a

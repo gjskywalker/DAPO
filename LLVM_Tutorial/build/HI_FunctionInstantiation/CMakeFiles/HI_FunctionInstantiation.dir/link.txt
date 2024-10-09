@@ -1,2 +1,0 @@
-/usr/local/bin/llvm-ar qc libHI_FunctionInstantiation.a CMakeFiles/HI_FunctionInstantiation.dir/HI_FunctionInstantiation.cc.o
-/usr/local/bin/llvm-ranlib libHI_FunctionInstantiation.a

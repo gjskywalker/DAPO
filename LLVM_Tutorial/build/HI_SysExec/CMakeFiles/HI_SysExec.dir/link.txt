@@ -1,2 +1,0 @@
-/usr/local/bin/llvm-ar qc libHI_SysExec.a CMakeFiles/HI_SysExec.dir/HI_SysExec.cc.o
-/usr/local/bin/llvm-ranlib libHI_SysExec.a

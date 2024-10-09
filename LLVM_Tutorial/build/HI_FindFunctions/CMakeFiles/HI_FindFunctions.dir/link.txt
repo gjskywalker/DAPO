@@ -1,2 +1,0 @@
-/usr/local/bin/llvm-ar qc libHI_FindFunctions.a CMakeFiles/HI_FindFunctions.dir/HI_FindFunction.cc.o
-/usr/local/bin/llvm-ranlib libHI_FindFunctions.a

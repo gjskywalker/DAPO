@@ -1,2 +1,0 @@
-/usr/local/bin/llvm-ar qc libHI_DependenceList.a CMakeFiles/HI_DependenceList.dir/HI_DependenceList.cc.o
-/usr/local/bin/llvm-ranlib libHI_DependenceList.a

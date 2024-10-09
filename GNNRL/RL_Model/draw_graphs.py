@@ -88,35 +88,27 @@ def inference_graph():
 # ax2.legend(fontsize=14, loc='best').remove()
 
 def train_infer():
-    # 设置风格和颜色
     plt.style.use('default')
     # ['#a8acb9', '#cb7e83']
     colors = ['#a8acb9', '#95baa6', '#2b6688', '#cb7e83']
     
-    # 创建数据
     data1 = np.array([6.04, 5.07, 6.26, 5.88])
     data2 = np.array([1.21, 1.17,  3.24, 4.73])
 
-    # 创建图表
     fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(8, 4), sharey=True)
     fig.subplots_adjust(wspace=0.3)
 
-    # 函数用于绘制柱状图和连线
     def plot_bars_and_line(ax, data, with_hatch=False):
         bars = ax.bar(range(4), data, color=colors, edgecolor='black', linewidth=1.5, width=0.6,
                     hatch='//' if with_hatch else '')
         
-        # 获取柱子的中心x坐标和顶部y坐标
         x = [bar.get_x() + bar.get_width() / 2 for bar in bars]
         y = [bar.get_height() for bar in bars]
         
-        # 绘制连接线
         ax.plot(x, y, color='red', linestyle='-', linewidth=2, marker='o')
 
-    # 绘制第一组柱状图（带斜线阴影）和连接线
     plot_bars_and_line(ax1, data1, with_hatch=True)
 
-    # 绘制第二组柱状图（实心）和连接线
     plot_bars_and_line(ax2, data2)
 
     # for p in ax1.patches:
@@ -137,23 +129,20 @@ def train_infer():
                         (p.get_x() + p.get_width() / 2., p.get_height()), 
                         ha='center', va='baseline', fontsize=12, color='black', xytext=(0, 5), 
                         textcoords='offset points')
-    # 设置标签和标题
+            
     ax1.set_title('Training Result w.r.t -O0', fontsize=14)
     ax2.set_title('Inference Result w.r.t. -O0', fontsize=14)
     ax1.set_xlabel('')
     ax2.set_xlabel('')
     ax1.set_ylabel('Performance Improvement', fontsize=14)
 
-    # 设置刻度
     for ax in (ax1, ax2):
         ax.set_xticks(range(4))
         ax.set_xticklabels(['Autophase', 'GCN', 'PNA', r'$\bf{RGCN^*}$'], fontsize=14)
 
     plt.tight_layout()
-    # # 移除网格线
     # ax1.grid(False)
-    
-    # # 只保留底部和左侧的轴线
+
     # ax1.spines['top'].set_visible(False)
     # ax1.spines['right'].set_visible(False)
     # ax1.spines['left'].set_visible(True)
@@ -165,43 +154,33 @@ def train_infer():
     plt.savefig("Train_Infer.pdf", dpi=800)
 
 def new_train_infer():
-    # 设置风格和颜色
     plt.style.use('default')
     colors = ['#a8acb9', '#95baa6', '#2b6688', '#cb7e83']
     plt.subplots_adjust(left=0.1, right=0.98, bottom=0.15, top=0.95)
-    # 创建数据
     data1 = np.array([6.04, 5.07, 6.26, 5.88])
     data2 = np.array([1.21, 1.17, 3.24, 4.73])
 
-    # 创建图表
     fig, ax = plt.subplots(figsize=(12, 6))
 
-    # 自定义x位置
     x1 = np.arange(4)
     x2 = np.arange(5.5, 9.5)  # 增加间隔
 
-    # 绘制柱状图
     bars1 = ax.bar(x1, data1, color=colors, edgecolor='black', linewidth=1.5, width=0.6, hatch='//', label='Training')
     bars2 = ax.bar(x2, data2, color=colors, edgecolor='black', linewidth=1.5, width=0.6, label='Inference')
 
-    # 获取柱子的中心x坐标和顶部y坐标
     x = np.concatenate([x1, x2])
     y = np.concatenate([data1, data2])
 
-    # 绘制连接线
     ax.plot(x1, data1, color='red', linestyle='-', linewidth=2, marker='o')
     ax.plot(x2, data2, color='red', linestyle='-', linewidth=2, marker='o')
 
-    # 设置标签和标题
     ax.set_title('Performance Improvement', fontsize=14)
     ax.set_ylabel('Performance Improvement', fontsize=14)
 
-    # 设置刻度
     ax.set_xticks(np.concatenate([x1, x2]))
     ax.set_xticklabels(['Autophase', 'GCN', 'PNA', r'$\bf{RGCN^*}$', 
                         'Autophase', 'GCN', 'PNA', r'$\bf{RGCN^*}$'], fontsize=14, rotation=45)
 
-    # 添加注释
     for p in bars1 + bars2:
         height = p.get_height()
         ax.annotate(f'{height:.2f}', 
@@ -209,13 +188,10 @@ def new_train_infer():
                     ha='center', va='baseline', fontsize=12, color='black', xytext=(0, 5), 
                     textcoords='offset points')
 
-    # 添加图例
     ax.legend()
 
-    # 调整x轴限制以减少第八个柱子和边框的距离
     ax.set_xlim(-0.5, 9)
-
-    # 调整图形布局
+  
     # plt.tight_layout(rect=[0, 0.1, 1, 1.0])
     plt.savefig("a.pdf", dpi=800)
     # plt.tight_layout()

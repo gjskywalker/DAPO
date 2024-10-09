@@ -15,7 +15,7 @@ parser.add_argument("--modelpath", "-m", default="Embedding_model_RGCNConv.pth")
 args = parser.parse_args()
 
 env_config = {
-    'model_path' : "/home/eeuser/Desktop/GRL-HLS/GNNRL/GNN_Model/models/" + args.modelpath,
+    'model_path' : " " + args.modelpath,
     'normalize': False,
     'orig_and_normalize':False,
     'bm_name':'test',
@@ -47,7 +47,7 @@ config = (
 
 # Load the trained model for inference
 trained_agent = config.build()
-trained_agent.restore("/home/eeuser/ray_results/PPO_rgcn_random_Training/PPO_HLSMultiEnv_e0ece_00000_0_2024-09-07_15-22-02/checkpoint_000003")
+trained_agent.restore("")
 
 count = 0
 env = trained_agent.env_creator(env_config)

@@ -1,2 +1,0 @@
-/usr/local/bin/llvm-ar qc libHI_RemoveRedundantAccess.a CMakeFiles/HI_RemoveRedundantAccess.dir/HI_RemoveRedundantAccess.cc.o
-/usr/local/bin/llvm-ranlib libHI_RemoveRedundantAccess.a

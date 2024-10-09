@@ -1,2 +1,0 @@
-/usr/local/bin/llvm-ar qc libHI_LoopInFormationCollect.a CMakeFiles/HI_LoopInFormationCollect.dir/HI_LoopInFormationCollect.cc.o
-/usr/local/bin/llvm-ranlib libHI_LoopInFormationCollect.a

@@ -34,7 +34,7 @@ parser.add_argument("--modelpath", "-m", default="Embedding_model_RGCNConv.pth")
 args = parser.parse_args()
 
 env_config = {
-    'model_path' : "/home/eeuser/Desktop/GRL-HLS/GNNRL/GNN_Model/models/" + args.modelpath,
+    'model_path' : "" + args.modelpath,
     'normalize': False,
     'orig_and_normalize':False,
     'bm_name':'random',

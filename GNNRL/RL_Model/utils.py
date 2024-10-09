@@ -95,7 +95,7 @@ def print_data(data, path, testbench_type):
 
 def write_excel(data, rno):    
     import openpyxl
-    workbook = openpyxl.load_workbook("/home/eeuser/Desktop/GRL-HLS/GNNRL/RL_Model/gym_env/envs/file_names.xlsx")
+    workbook = openpyxl.load_workbook(" ")
     sheet = workbook.active
     index = 0
     for i in data:
@@ -105,7 +105,7 @@ def write_excel(data, rno):
         sheet.cell(row=rno+1, column=index+2, value=data[i]['cycle'])
         print(data[i]['cycle'])
         index += 1
-        workbook.save("/home/eeuser/Desktop/GRL-HLS/GNNRL/RL_Model/gym_env/envs/file_names.xlsx")
+        workbook.save(" ")
         
 def build_dataset(data, testbench_type):
     target_passes = []

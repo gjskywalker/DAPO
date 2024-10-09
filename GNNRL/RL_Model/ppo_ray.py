@@ -25,12 +25,6 @@ class CustomStopper(tune.Stopper):
 
 stopper = CustomStopper()
 
-trainsets = [
-    ("test0.cc","/home/eeuser/Desktop/GRL-HLS/Dataset/testsset/test0/"),
-    ("test1.cc","/home/eeuser/Desktop/GRL-HLS/Dataset/testsset/test1/"),
-    ("test2.cc","/home/eeuser/Desktop/GRL-HLS/Dataset/testsset/test2/")
-]
-
 parser = argparse.ArgumentParser()
 parser.add_argument("--feature", "-f")
 parser.add_argument("--record", "-r")
@@ -43,7 +37,7 @@ for i, bm in enumerate(trainsets):
     env_config["run_dir"] = 'run_random' + str(i)
     env_config["feature_type"] = args.feature
     env_config["record_file"] = args.record
-    env_config['model_path'] = "/home/eeuser/Desktop/GRL-HLS/GNNRL/GNN_Model/models/" + args.modelpath
+    env_config['model_path'] = " " + args.modelpath
     config = (
         PPOConfig()
         .training(

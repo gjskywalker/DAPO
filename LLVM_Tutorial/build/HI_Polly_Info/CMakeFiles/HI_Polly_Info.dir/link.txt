@@ -1,2 +1,0 @@
-/usr/local/bin/llvm-ar qc libHI_Polly_Info.a CMakeFiles/HI_Polly_Info.dir/HI_Polly_Info.cc.o
-/usr/local/bin/llvm-ranlib libHI_Polly_Info.a

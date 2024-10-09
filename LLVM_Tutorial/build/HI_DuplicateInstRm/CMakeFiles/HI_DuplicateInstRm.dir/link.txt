@@ -1,2 +1,0 @@
-/usr/local/bin/llvm-ar qc libHI_DuplicateInstRm.a CMakeFiles/HI_DuplicateInstRm.dir/HI_DuplicateInstRm.cc.o
-/usr/local/bin/llvm-ranlib libHI_DuplicateInstRm.a

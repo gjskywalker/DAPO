@@ -1,6 +1,6 @@
-# DAPO
+# DAPO:  Design-Aware pass-ordering in High-level Synthesis with Graph Neural Network and Deep Reinforcement Learning
 
-Our project aims to use reinforcement learning network to find the best pass sequences for each program, which can overcome the optimal redundancy and unstable optimization results caused by O3.
+DAPO aims to use reinforcement learning network to find the best pass sequences for each program, which can overcome the optimal redundancy and unstable optimization results caused by O3.
 
 We utilize a feature_extractor to construct a graph representation derived from the program’s Control Data Flow Graph (CDFG). This graph is then input into a pre-trained Graph Neural Network (GNN) to generate program embeddings. The resulting feature vector serves as the observation space for Reinforcement Learning (RL) algorithms. Ultimately, the Reinforcement Learning algorithm generates a sequence of passes that optimizes the input program, aiming to achieve the lowest possible latency.
 
@@ -8,13 +8,13 @@ To run this project. You need to build our QoR estimator and feature extractor f
 
 ```shell
 # Build QoR estimator
-cd Utils/Tests/AccelerationCycle/
+cd Tools/Tests/AccelerationCycle/
 mkdir build
 cd build
 cmake ../
 make 
 # Build FeatureExtractor
-cd Utils/Tests/FeatureExtractor/
+cd Tools/Tests/FeatureExtractor/
 mkdir build
 cd build
 cmake ../

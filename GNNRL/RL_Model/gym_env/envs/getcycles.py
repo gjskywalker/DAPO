@@ -118,17 +118,15 @@ def light_hls_getHWCycles(pgm_name, pgm_path, opt_indice, run_path="."):
           break
       mv_command = "mv "+IRfilePath+pgm_name+'.'+str(pass_order+1)+".bc "+IRfilePath+pgm_name+"top.bc "
       os.system(mv_command)
-      # cp1_command = "cp "+IRfilePath+'/'+"top.bc "+"/home/eeuser/Desktop/GRL-HLS/LLVM_Tutorial/Tests/AccelerationCycle/build"
       # os.system(cp1_command) 
     else:
       mv_command = "mv "+IRfilePath+pgm_name+'.'+"0.bc "+IRfilePath+pgm_name+"top.bc "
       os.system(mv_command)
-      # cp1_command = "cp "+IRfilePath+'/'+"top.bc "+"/home/eeuser/Desktop/GRL-HLS/LLVM_Tutorial/Tests/AccelerationCycle/build"
       # os.system(cp1_command) 
     
 
   #TODO: Use this new pass to run opt and get the bitcode file, and transfer the bc file to our cycle estimator to get the cycle
-  execute_command = "cd /home/eeuser/Desktop/GRL-HLS/LLVM_Tutorial/Tests/AccelerationCycle/build && ./AccelerationCycle dut ../config.txt " + IRfilePath + pgm_name + "top.bc"
+  execute_command = " "
   proc = subprocess.Popen([execute_command], stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
   (out, err) = proc.communicate()
   latency_match = re.search(r"latency is (\d+)", out.decode("utf-8"))
@@ -164,10 +162,10 @@ def get_Ox_Cycles(pgm_name, pgm_path, Opt_level, run_path="."):
   if result_0.returncode == 0:
       mv_command = "mv "+IRfilePath+'/'+pgm_name+".bc "+IRfilePath+'/'+"top.bc "
       os.system(mv_command)
-      cp1_command = "cp "+IRfilePath+'/'+"top.bc "+"/home/eeuser/Desktop/GRL-HLS/LLVM_Tutorial/Tests/AccelerationCycle/build" 
+      cp1_command = "cp "+IRfilePath+'/'+"top.bc "+"" 
       os.system(cp1_command)  
       #TODO: Use this new pass to run opt and get the bitcode file, and transfer the bc file to our cycle estimator to get the cycle
-      execute_command = "cd /home/eeuser/Desktop/GRL-HLS/LLVM_Tutorial/Tests/AccelerationCycle/build && ./AccelerationCycle dut ../config.txt top.bc"
+      execute_command = "cd  && ./AccelerationCycle dut ../config.txt top.bc"
       proc = subprocess.Popen([execute_command], stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
       (out, err) = proc.communicate()
       latency_match = re.search(r"latency is (\d+)", out.decode("utf-8"))
@@ -186,149 +184,3 @@ def get_Ox_Cycles(pgm_name, pgm_path, Opt_level, run_path="."):
         valid = 0
     
   return hw_cycle, valid, errs_log
-
-def main():
-  # indice = [35] 
-  # 35 : licm ; 66 : loop-unroll
-  '''
-  Indice = [35] : cycles = 91004
-  Indice = [66, 35] : cycles = 91004
-  Indice = [33, 26, 68, 49, 25, 36, 23, 4, 15, 19, 28, 8, 13, 8, 54, 25, 6, 52, 44, 58, 68, 39, 53, 69, 45, 47, 37, 64, 40, 51, 50, 12, 66, 4, 19, 34, 44, 12, 70, 28, 32, 38, 53, 53, 50, 14, 29, 52, 58, 44, 33, 22, 66] : cycles = 90491
-  Indice = [33, 26, 68, 49, 25, 36, 23, 4, 15, 19, 28, 8, 13, 8, 54, 25, 6, 52, 44, 58, 68, 39, 53, 69, 45, 47, 37, 64, 40, 51, 50, 12, 66, 4, 19, 34, 44, 12, 70, 28, 32, 38, 53, 53, 50, 14, 29, 52, 58, 44, 33, 22, 66, 35] : cycles = 89883
-  
-  [36] 181244
-  [15] 202844
-  [25] 181244
-  [6] 181242
-  [44] 182277
-  [66] 181244
-  [66] 181244
-  [35] 91004
-  
-  [36] 181244
-  [36, 15] 202843
-  [36, 15, 25] 202843
-  [36, 15, 25, 6] 181244
-  [36, 15, 25, 6, 44] 94842
-  [36, 15, 25, 6, 44, 66] 94842
-  [36, 15, 25, 6, 44, 66, 66] 92283
-  [36, 15, 25, 6, 44, 66, 66, 35] 89883
-  
-  [36] 181244
-  [36, 6] 181244
-  [36, 6, 44] 181242
-  [36, 6, 44, 66] 138042
-  [36, 6, 44, 66, 66] 111290
-  [36, 6, 44, 66, 66, 35] 87994
-  
-  loop-rotate
-  jump-threading
-  sroa
-  gvn
-  loop-unroll
-  loop-unroll
-  licm
-  
-  [36,  44, 6, 66, 66, 35] cycles : 95316
-  [36,  6, 44, 66, 66, 35] cycles : 87994
-  Order of 6 and 44 should be important, and [6, 44] should be before 66
-  36 should be head of 66
-  '''
-  passes = []
-  
-  '''
-  Motivation 1
-  test1
-  
-  licm
-  instcombine
-  loop-unroll
-  loop-vectorize
-  loop-rotate
-  instcombine
-  gvn
-
-  typepromotion
-  
-  689682
-  
-  [35] 881564
-  [35, 15] 874523
-  [35, 15, 62] 1317803
-  [35, 15, 62, 36] 1318203
-  [35, 15, 62, 36, 15] 1287662
-  [35, 15, 62, 36, 15, 66] 1287642
-  [35, 15, 62, 36, 15, 66, 13] 690662
-  [35, 15, 62, 36, 15, 66, 13, 44] 689682
-  [35, 74, 41, 35, 69, 24, 35, 18, 7, 8, 10, 53, 13, 50, 58, 8, 47, 72, 35, 29, 50, 52, 16, 15, 35, 69, 61, 44, 67, 69, 69, 72, 58, 4, 10, 7, 62, 36, 16, 43, 15, 57, 46, 60, 16, 22, 35, 18, 4, 44, 29, 22, 59, 57, 70, 69, 51, 20, 64, 28, 47, 69, 2, 51, 7, 15, 15, 66, 17, 12, 45, 46, 15, 13]
-  
-  Motivation 2
-  GED(60, 37) : 385
-  GED(60, 47) : 2513
-  GED(47, 37) : 2553
-  {P1 : 60, P2 : 37, P3 : 47}
-  {S1 : [44, 66, 10, 6, 34, 66, 44, 36], S2 : [7, 36, 35, 62, 15, 6, 39], S3 : [15, 36, 44, 41]}
-  Current Program:random47 -- Cycles:4316098 -- Passes:[7, 36, 35, 62, 15, 6, 39] early-cse loop-rotate licm loop-vectorize instcombine sroa indvars {'initial cycle': 4801645, 'O3 cycle': 4522643, 'rl cycle': 4299236, 'rl_60 cycle': 4531062}
-  Current Program:random37 -- Cycles:3682522 -- Passes:[15, 36, 44, 66/41] instcombine loop-rotate gvn loop-unroll {'initial cycle': 3846362, 'O3 cycle': 3698906, 'rl cycle': 3682552, 'rl_60 cycle': 3748058, 'rl_47 cycle': 3813594, 'rl reverse loop-unroll&loop-rotate': 3813594}
-  Current Program:random60 -- Cycles:5310996 -- Passes:[44, 66, 10, 6, 34, 66, 44, 36, 15] gvn loop-unroll ipsccp sroa loop-simplifycfg loop-unroll gvn loop-rotate instcombine {'initial cycle': 10251490, 'O3 cycle': 5858348, 'rl cycle': 5310996, 'rl reverse loop-unroll&loop-rotate': 6965896}
-  
-  '''
-  import pickle
-  O3_info = {}
-  path = "/home/eeuser/Desktop/GRL-HLS/Dataset/trainingset/"
-  for i in range(0, 1):
-    pgm = "random" + str(i)
-    cycle, _, _ = get_Ox_Cycles(pgm_name=pgm, pgm_path="/home/eeuser/Desktop/GRL-HLS/Dataset/trainingset/", Opt_level=3 , run_path="/home/eeuser/Desktop/GRL-HLS/GNNRL/RL_Model/gym_env/envs/Feature_Cycles_Tests")
-    # cycle, _, _ = light_hls_getHWCycles(pgm_name=pgm.replace(".cc", ""), pgm_path=path, opt_indice=[], run_path="/home/eeuser/Desktop/GRL-HLS/GNNRL/RL_Model/gym_env/envs/Feature_Cycles_Tests")
-    cycles = {}
-    cycles['cycle'] = cycle
-    O3_info[pgm.replace(".cc", "")] = cycles
-  with open("O3_info.pkl", "wb") as f:
-    pickle.dump(O3_info, f)
-  
-  # cycle, _, _ = light_hls_getHWCycles(pgm_name=c_code, pgm_path="/home/eeuser/Desktop/GRL-HLS/Dataset/testsset/test0/", opt_indice=indices, run_path="/home/eeuser/Desktop/GRL-HLS/GNNRL/RL_Model/gym_env/envs/Feature_Cycles_Tests")
-  # cycle, _, _ = get_Ox_Cycles(pgm_name=c_code, pgm_path="/home/eeuser/Desktop/GRL-HLS/Dataset/testsset/test0/", Opt_level=3 , run_path="/home/eeuser/Desktop/GRL-HLS/GNNRL/RL_Model/gym_env/envs/Feature_Cycles_Tests")
-  # print(cycle)
-
-if __name__ == "__main__":
-  main()
-  # import pickle
-  # prune_passes_pgm = {}
-  # with open("cycles_random_RGCN_V1_training_whole.pkl", "rb") as f:
-  #   random_programs = pickle.load(f)
-  #   for i in random_programs:
-  #     passes = random_programs[i]['passes']
-  #     init_cycle = random_programs[i]['cycle']
-  #     print("Init_cycles: {}".format(init_cycle) + " Current_Program: {}".format(i))
-  #     pass_len = len(passes)
-  #     for n in reversed(range(pass_len)):
-  #       buffer_pass = passes.pop(n)
-  #       print(passes)
-  #       cycle, _, _ = light_hls_getHWCycles(pgm_name=i, pgm_path="/home/eeuser/Desktop/GRL-HLS/Dataset/trainingset/", opt_indice=passes, run_path="/home/eeuser/Desktop/GRL-HLS/GNNRL/RL_Model/gym_env/envs/Feature_Cycles_Tests")
-  #       print("Current Cycles: {}".format(cycle))
-  #       if cycle > init_cycle or cycle == 0:
-  #         passes.insert(n, buffer_pass)
-  #       print(passes)
-  #     c = {}
-  #     c['passes'] = passes
-  #     c['cycle'] = init_cycle
-  #     prune_passes_pgm[i] = c
-  # with open("prune_passes_pgm.pkl", "wb") as f:
-  #   pickle.dump(prune_passes_pgm, f)
-    
-  # import openpyxl
-  # workbook = openpyxl.load_workbook("file_names.xlsx")
-  # sheet = workbook.active
-  # run_path = "/home/eeuser/Desktop/GRL-HLS/GNNRL/RL_Model/gym_env/envs/test"
-  # from get_TestBench import get_polybench, get_random, get_testset
-  # bms = get_testset()
-  # for i, bm in enumerate(bms):
-  #   pgm_name, pgm_path= bm
-  #   pgm_name = pgm_name.replace(".cc", "")
-  #   sheet.cell(row=9, column=i+2, value=pgm_name)
-  #   cycle, _, _ = get_Ox_Cycles(pgm_name=pgm_name, pgm_path=pgm_path, Opt_level=3, run_path=run_path)
-  #   sheet.cell(row=10, column=i+2, value=cycle)
-  #   workbook.save("file_names.xlsx")
-# ['simple-loop-unswitch', 'rpo-function-attrs', 'forceattrs', 'sccp','globalopt', 'forceattrs', 'alignment-from-assumptions', 'globaldce', 'correlated-propagation', 'loop-sink', 'instcombine', 'verify', 'memcpyopt', 'loop-simplify', 'tailcallelim', 'deadargelim', 'elim-avail-extern', 'inferattrs', 'bdce', 'licm', 'dse', 'slp-vectorizer', 'ipsccp', 'constmerge', 'instsimplify', 'simplifycfg', 'jump-threading', 'loop-load-elim', 'adce', 'lcssa', 'loop-distribute']  
-    
-# ['demanded-bits', 'scoped-noalias-aa', 'scalar-evolution', 'basic-aa', 'targetlibinfo', 'aa', 'block-freq', 'opt-remark-emit', 'domtree', 'memdep', 'simple-loop-unswitch', 'profile-summary', 'branch-prob', 'forceattrs', 'rpo-function-attrs', 'globals-aa', 'postdomtree', 'tbaa', 'loops', 'lazy-value-info', 'sccp']

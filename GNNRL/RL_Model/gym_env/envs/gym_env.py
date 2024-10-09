@@ -12,9 +12,6 @@ import pickle
 import numpy as np
 import copy
 
-# Add the path to the folder containing my_module
-sys.path.insert(0, os.path.abspath('/home/eeuser/Desktop/GRL-HLS/'))
-
 # Now you can import the function
 from GNNRL.GNN_Model import RGCN_Pytorch, GCN_Pytorch, PNA_Pytorch
 

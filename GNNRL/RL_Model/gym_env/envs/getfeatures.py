@@ -16,7 +16,7 @@ features = ["Number of BB where total args for phi nodes > 5", "Number of BB whe
 
 def extractnum_run_stats(pgm_name, opt_indice, path="."):
   IRfilePath = path+"/cycleIRfile"
-  execute_cmd = "cd /home/eeuser/Desktop/GRL-HLS/LLVM_Tutorial/Tests/NumExtractor/build && ./ExtraNum " + IRfilePath + "/" + pgm_name + "top.bc" 
+  execute_cmd = "cd  && ./ExtraNum " + IRfilePath + "/" + pgm_name + "top.bc" 
   proc = subprocess.Popen([execute_cmd], stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
   (out, err) = proc.communicate()
   # print (err)
@@ -96,15 +96,10 @@ def read_file(edge_file, node_file):
 def gnn_get_feature(pgm_name, pre_graphs, path="."):
   pregraph = pre_graphs
   IRfilePath = path + "/cycleIRfile/"
-  # cp_cmd = "cp " + IRfilePath + "top.bc /home/eeuser/Desktop/GRL-HLS/LLVM_Tutorial/Tests/FeatureExtractor/build"
-  # os.system(cp_cmd)
-  execute_cmd = "cd /home/eeuser/Desktop/GRL-HLS/LLVM_Tutorial/Tests/FeatureExtractor/build && ./FeatureExtractor_V5 " + IRfilePath + " " +pgm_name + " " + IRfilePath + pgm_name + "top.bc" 
+
+  execute_cmd = "cd  && ./FeatureExtractor_V5 " + IRfilePath + " " +pgm_name + " " + IRfilePath + pgm_name + "top.bc" 
   result = subprocess.run(execute_cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
   if result.returncode == 0:
-    # cp1_command = "cp /home/eeuser/Desktop/GRL-HLS/LLVM_Tutorial/Tests/FeatureExtractor/build/Edge_"+pgm_name+".csv " + IRfilePath
-    # os.system(cp1_command)
-    # cp2_command = "cp /home/eeuser/Desktop/GRL-HLS/LLVM_Tutorial/Tests/FeatureExtractor/build/Node_Feature_"+pgm_name+".csv " + IRfilePath
-    # os.system(cp2_command)
     graph = read_file(IRfilePath + "Edge_"+pgm_name+".csv", IRfilePath + "Node_Feature_"+pgm_name+".csv")
     return graph
   else:
@@ -114,10 +109,9 @@ def main():
     training_set = get_random(idx=0, pgm_num=70)
     Embeddings_static = list()
     for (pgm, path) in training_set:
-      os.system("cp " + path + pgm + " /home/eeuser/Desktop/GRL-HLS/GNNRL/RL_Model/gym_env/envs/Feature_Cycles_Tests/cycleIRfile/ ")
-      os.system("cd /home/eeuser/Desktop/GRL-HLS/GNNRL/RL_Model/gym_env/envs/Feature_Cycles_Tests/cycleIRfile/ && clang -O0 -Xclang -disable-O0-optnone -emit-llvm -S " + pgm + " -o " + pgm.replace(".cc", "") + "top.bc")
-      m = extractnum_run_stats(pgm_name=pgm.replace(".cc", ""), opt_indice=[], path="/home/eeuser/Desktop/GRL-HLS/GNNRL/RL_Model/gym_env/envs/Feature_Cycles_Tests/")
-      # m = gnn_get_feature(c_code,indices,path="/home/eeuser/Desktop/GRL-HLS/GNNRL/RL_Model/gym_env/envs/Feature_Cycles_Tests/")
+      os.system("cp " + path + pgm + "  ")
+      os.system("cd  && clang -O0 -Xclang -disable-O0-optnone -emit-llvm -S " + pgm + " -o " + pgm.replace(".cc", "") + "top.bc")
+      m = extractnum_run_stats(pgm_name=pgm.replace(".cc", ""), opt_indice=[], path="")
       Embeddings_static.append(m)
     import pickle
     with open("Embeddings_static.pkl", "wb") as fp:

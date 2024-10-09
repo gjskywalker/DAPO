@@ -40,19 +40,19 @@ def get_random(idx : int, pgm_num : int) -> list :
     [fl1.txt, fl2.txt, fl3.txt, fl4.txt]
 
   Args:
-    path (str, optional): The path of the directory we are interested in. Defaults to "/home/eeuser/Desktop/GRL-HLS/Dataset/Training_pre".
+    path (str, optional): The path of the directory we are interested in. Defaults to " ".
     N (int, optional): N is the number of benchmarks to pick from the given path. Defaults to ten.
 
   Returns:
     Returns a list of N strings where each element is the path to a benchmark file.
   """
-  path="/home/eeuser/Desktop/GRL-HLS/Dataset/Cross_Validation/" + str(idx) + "/trainingset"
+  path=" " + str(idx) + "/trainingset"
   random_list = []
   for i in range(0, pgm_num):
     random_list.append(("random" + str(i) + ".cc", path+"/"))
   return random_list 
 
-def get_polybench(path = "/home/eeuser/Desktop/GRL-HLS/Dataset/polybench/", N=16, use_dir=True):
+def get_polybench(path = " ", N=16, use_dir=True):
   polybench = [
     ("2mm","2mm"), 
     ("3mm","3mm"),
@@ -92,19 +92,19 @@ def get_test(idx : int, pgm_num : int) -> list :
     [fl1.txt, fl2.txt, fl3.txt, fl4.txt]
 
   Args:
-    path (str, optional): The path of the directory we are interested in. Defaults to "/home/eeuser/Desktop/GRL-HLS/Dataset/Training_pre".
+    path (str, optional): The path of the directory we are interested in. Defaults to " ".
     N (int, optional): N is the number of benchmarks to pick from the given path. Defaults to ten.
 
   Returns:
     Returns a list of N strings where each element is the path to a benchmark file.
   """
-  path="/home/eeuser/Desktop/GRL-HLS/Dataset/Cross_Validation/" + str(idx) + "/testset"
+  path=" " + str(idx) + "/testset"
   random_list = []
   for i in range(0, pgm_num):
     random_list.append(("test" + str(i) + ".cc", path+"/"))
   return random_list 
                             
-def get_chstone(path = "/home/eeuser/Desktop/GRL-HLS/Dataset/chstone", N=12, use_dir=True):
+def get_chstone(path = " ", N=12, use_dir=True):
   """
   Examples :
     >>> print(get_chstone())

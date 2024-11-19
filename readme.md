@@ -1,4 +1,4 @@
-# DAPO:  Design-Aware Pass Ordering in High-level Synthesis with Graph Contrastive Learning and Reinforcement Learning
+# DAPO: Design-Aware Learning Framework for Pass Ordering Optimization in High-Level Synthesis
 
 DAPO is an open-source framework designed to generate customized optimization pass sequences for general HLS designs. DAPO leverages a heterogeneous graph with a contrastive learning method to generate expressive program embeddings. This process is implemented in a reinforcement learning framework with the support of an accurate light-weight HLS tool. Together, these components enable the creation of a robust inference model
 

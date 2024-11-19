@@ -56,12 +56,12 @@ def read_file(edge_file, node_file):
 def gnn_get_feature(c_code, pre_graphs, path="."):
   pregraph = pre_graphs
   IRfilePath = path + "/cycleIRfile"
-  cp_cmd = "cp " + IRfilePath + "/" + "top.bc /home/eeuser/Desktop/GRL-HLS/LLVM_Tutorial/Tests/FeatureExtractor/build"
+  cp_cmd = "cp " + IRfilePath + "/" + "top.bc DAPO/Light_weight_HLS/Tests/FeatureExtractor/build"
   os.system(cp_cmd)
-  execute_cmd = "cd /home/eeuser/Desktop/GRL-HLS/LLVM_Tutorial/Tests/FeatureExtractor/build && ./FeatureExtractor_V2 0 top.bc" 
+  execute_cmd = "cd /DAPO/Light_weight_HLS/Tools/HGraph/FeatureExtractor/build && ./FeatureExtractor_V2 0 top.bc" 
   result = subprocess.run(execute_cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
   if result.returncode == 0:
-    graph = read_file("/home/eeuser/Desktop/GRL-HLS/LLVM_Tutorial/Tests/FeatureExtractor/build/Edge_0.csv", "/home/eeuser/Desktop/GRL-HLS/LLVM_Tutorial/Tests/FeatureExtractor/build/Node_Feature_0.csv")
+    graph = read_file("/DAPO/Light_weight_HLS/Tools/HGraph/FeatureExtractor/build/Edge_0.csv", "/DAPO/Light_weight_HLS/Tools/HGraph/FeatureExtractor/build/Node_Feature_0.csv")
     return graph
   else:
     return pregraph
@@ -79,12 +79,6 @@ def print_all_model():
   print(f"Loss for GATv2Conv : {checkpoint1['loss']}")
   checkpoint1 = torch.load('models/Embedding_model_GCNConv.pth')
   print(f"Loss for GCNConv : {checkpoint1['loss']}")
-
-
-# indices=[]
-# c_code="random42"
-# input = gnn_get_feature(c_code,indices,path="/home/eeuser/Desktop/GRL-HLS/GNNRL/RL_Model/run_0_p407502")
-
 
 # checkpoint = torch.load("Embedding_model.pth")
 # gna.load_state_dict(checkpoint)

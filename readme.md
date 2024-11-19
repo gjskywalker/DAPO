@@ -1,8 +1,6 @@
-# DAPO:  Design-Aware pass-ordering in High-level Synthesis with Graph Neural Network and Deep Reinforcement Learning
+# DAPO:  Design-Aware Pass Ordering in High-level Synthesis with Graph Contrastive Learning and Reinforcement Learning
 
-DAPO aims to use reinforcement learning network to find the best pass sequences for each program, which can overcome the optimal redundancy and unstable optimization results caused by O3.
-
-We utilize a feature_extractor to construct a graph representation derived from the program’s Control Data Flow Graph (CDFG). This graph is then input into a pre-trained Graph Neural Network (GNN) to generate program embeddings. The resulting feature vector serves as the observation space for Reinforcement Learning (RL) algorithms. Ultimately, the Reinforcement Learning algorithm generates a sequence of passes that optimizes the input program, aiming to achieve the lowest possible latency.
+DAPO is an open-source framework designed to generate customized optimization pass sequences for general HLS designs. DAPO leverages a heterogeneous graph with a contrastive learning method to generate expressive program embeddings. This process is implemented in a reinforcement learning framework with the support of an accurate light-weight HLS tool. Together, these components enable the creation of a robust inference model
 
 To run this project. You need to build our QoR estimator and feature extractor first. (LLVM-18 is required to build these).
 

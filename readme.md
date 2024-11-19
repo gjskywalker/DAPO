@@ -2,7 +2,7 @@
 
 DAPO is an open-source framework designed to generate customized optimization pass sequences for general HLS designs. DAPO leverages a heterogeneous graph with a contrastive learning method to generate expressive program embeddings. This process is implemented in a reinforcement learning framework with the support of an accurate light-weight HLS tool. Together, these components enable the creation of a robust inference model
 
-To run this project. You need to build our QoR estimator and feature extractor first. (LLVM-18 is required to build these).
+To run this project. You need to build our QoR estimator and feature extractor first. (LLVM-18.1.0 is required to build these).
 
 ```shell
 # Build QoR estimator

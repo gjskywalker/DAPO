@@ -1,5 +1,5 @@
 import pickle
-import networkx as nx
+from HGED import graph_edit_distance
 import numpy as np
 from multiprocessing import Process, Manager
 
@@ -22,7 +22,7 @@ def edge_substitute(edge1, edge2):
         return 2
 
 def compute_distance(left, right, graphs, node_substitute, edge_substitute, return_dict):
-    distance = nx.graph_edit_distance(graphs[left], graphs[right], node_subst_cost=node_substitute, edge_subst_cost=edge_substitute, timeout=300)
+    distance = graph_edit_distance(graphs[left], graphs[right], node_subst_cost=node_substitute, edge_subst_cost=edge_substitute, timeout=300)
     if distance:
         return_dict[(left, right)] = distance
 

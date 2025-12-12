@@ -1,1 +1,0 @@
-This directory stores all the implementation of the Passes in the blog, which are located in their own directories respectively.

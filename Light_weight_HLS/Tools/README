@@ -1,6 +1,0 @@
-This directory stores all the tests, which have their main functions and can generate standalone executable.
-
-Please note that the Passes in the Implementaions directory will be first compiled into libraries in LLVM_Learner_Libs, for later linking.
-
-Please also note that the Passes in the Implementations directory will be compiled into build/building and the cp will not overwrite the old .a file in the special pass table, so if you change
-the Passes in the Implementations, you need to cp the new .a file from build/building to build or specific Pass table manually.

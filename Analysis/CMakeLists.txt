@@ -13,16 +13,31 @@ set(LLVM_DIR "/usr/local/lib/cmake/llvm" CACHE PATH "Path to LLVMConfig.cmake")
 set(Polly_DIR "/usr/local/lib/cmake/polly" CACHE PATH "Path to PollyConfig.cmake")
 
 find_package(LLVM REQUIRED CONFIG)
-find_package(Polly REQUIRED CONFIG)
+find_package(Polly QUIET CONFIG)
 
-find_library(POLLY_MAIN_LIB NAMES Polly HINTS /usr/local/lib)
-find_library(POLLY_ISL_LIB NAMES PollyISL HINTS /usr/local/lib)
-
-if(NOT POLLY_MAIN_LIB OR NOT POLLY_ISL_LIB)
-  message(FATAL_ERROR "Could not locate required Polly libraries. Set POLLY_MAIN_LIB, POLLY_ISL_LIB manually.")
+set(_polly_targets_ok TRUE)
+if(TARGET Polly)
+  get_target_property(_loc Polly IMPORTED_LOCATION)
+  if(NOT _loc)
+    set(_polly_targets_ok FALSE)
+  endif()
+else()
+  set(_polly_targets_ok FALSE)
 endif()
 
-set(Polly_LIBRARIES ${POLLY_MAIN_LIB} ${POLLY_ISL_LIB})
+if(Polly_FOUND AND _polly_targets_ok)
+  set(Polly_LIBRARIES ${Polly_LIBRARIES})
+else()
+  message(WARNING "Polly config missing usable imported libraries; falling back to manual search.")
+  find_library(POLLY_MAIN_LIB NAMES Polly HINTS /usr/local/lib)
+  find_library(POLLY_ISL_LIB NAMES PollyISL HINTS /usr/local/lib)
+
+  if(NOT POLLY_MAIN_LIB OR NOT POLLY_ISL_LIB)
+    message(FATAL_ERROR "Could not locate required Polly libraries. Set POLLY_MAIN_LIB, POLLY_ISL_LIB manually.")
+  endif()
+
+  set(Polly_LIBRARIES ${POLLY_MAIN_LIB} ${POLLY_ISL_LIB})
+endif()
 
 message(STATUS "Found LLVM ${LLVM_PACKAGE_VERSION}")
 message(STATUS "Using LLVMConfig.cmake in: ${LLVM_DIR}")

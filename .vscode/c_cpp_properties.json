@@ -1,0 +1,32 @@
+{
+    "configurations": [
+        {
+            "name": "Linux",
+            "includePath": [
+                "${workspaceFolder}/**",
+                "/home/eeuser/Desktop/llvm-project/llvm/include",
+                "/usr/local/include",
+                "/usr/include",
+                "/usr/include/c++/**",
+                "/usr/local/include/llvm",
+                "/usr/local/include/mlir",
+                "/home/eeuser/Desktop/llvm-project",
+                "${workspaceFolder}/Analysis/include/HI_feature_extractor"
+            ],
+            "defines": [
+                "__STDC_CONSTANT_MACROS",
+                "__STDC_FORMAT_MACROS",
+                "__STDC_LIMIT_MACROS",
+                "_DEBUG",
+                "UNICODE",
+                "_UNICODE"
+            ],
+            "compilerPath": "/usr/bin/g++",
+            "cStandard": "c17",
+            "cppStandard": "c++17",
+            "intelliSenseMode": "linux-gcc-x64",
+            "configurationProvider": "ms-vscode.cmake-tools"
+        }
+    ],
+    "version": 4
+}

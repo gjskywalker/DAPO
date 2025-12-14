@@ -1,0 +1,12 @@
+1. mem2reg should alway be performed first otherwise every variable in the IR needs to be load and stored;
+// constant/value propagation passes would always benefit from alias analysis and mem2reg passes;
+2. ipsccp doesn't perform well on function constant propagation, and it's necessary to append simplifycfg and dce to ipsccp/sccp;
+3. it seem early-cse(common subexpression elimination) doesn't have significant dependency with other passes;
+4. globalopt only works for programs with global values. It performs global value elimination, constant global value propagation and globel value lowering;
+// The following branch-instruction related optimization passes would benefit from constant/value propagation passes and benefits simplifycfg/loop-unroll passes;
+5. typepromotion mainly deals with bitwidth eliminating redundant zext and sext instructions;
+6. speculative-execution mainly works for memory access instructions within branch instructions;
+7. jump-threading & correlated-propagation mainly works for branch instructions;
+8. correlated-propagation;
+9. reassociate, can reassociate the computation equations and benefits gvn/instcombine passes (note gvn, global value numbering, where global is used to descibe the scope instead of the value type);
+// For loop optimization passes like loop-unroll, loop-pipeline, loop-vectorize, loop-deletion, loop-idiom, would benefits from transform passes like indvars, loop-rotate, loop-instsimplify, loop-simplifycfg, licm, 

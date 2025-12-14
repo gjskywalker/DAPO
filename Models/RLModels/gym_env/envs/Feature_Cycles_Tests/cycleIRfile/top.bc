@@ -1,0 +1,69 @@
+; ModuleID = '/home/eeuser/Desktop/GRL-HLS/GNNRL/RL_Model/gym_env/envs/Feature_Cycles_Tests/cycleIRfile/random79.cc'
+source_filename = "/home/eeuser/Desktop/GRL-HLS/GNNRL/RL_Model/gym_env/envs/Feature_Cycles_Tests/cycleIRfile/random79.cc"
+target datalayout = "e-m:e-p270:32:32-p271:32:32-p272:64:64-i64:64-i128:128-f80:128-n8:16:32:64-S128"
+target triple = "x86_64-unknown-linux-gnu"
+
+; Function Attrs: mustprogress nofree nosync nounwind memory(argmem: readwrite) uwtable
+define dso_local void @_Z3dutPA1024_dS0_S0_S0_S0_S0_(ptr nocapture noundef readonly %frame1, ptr nocapture noundef readonly %frame2, ptr nocapture noundef readonly %frame3, ptr nocapture noundef readonly %frame4, ptr nocapture noundef readonly %frame5, ptr nocapture noundef writeonly %gradient_z) local_unnamed_addr #0 {
+entry:
+  br label %for.cond1.preheader
+
+for.cond1.preheader:                              ; preds = %entry, %for.cond.cleanup3
+  %indvars.iv57 = phi i64 [ 0, %entry ], [ %indvars.iv.next58, %for.cond.cleanup3 ]
+  br label %for.body4
+
+for.cond.cleanup:                                 ; preds = %for.cond.cleanup3
+  ret void
+
+for.cond.cleanup3:                                ; preds = %for.body4
+  %indvars.iv.next58 = add nuw nsw i64 %indvars.iv57, 1
+  %exitcond60.not = icmp eq i64 %indvars.iv.next58, 436
+  br i1 %exitcond60.not, label %for.cond.cleanup, label %for.cond1.preheader, !llvm.loop !5
+
+for.body4:                                        ; preds = %for.cond1.preheader, %for.body4
+  %indvars.iv = phi i64 [ 0, %for.cond1.preheader ], [ %indvars.iv.next, %for.body4 ]
+  %arrayidx6 = getelementptr inbounds [1024 x double], ptr %frame1, i64 %indvars.iv57, i64 %indvars.iv
+  %0 = load double, ptr %arrayidx6, align 8, !tbaa !8
+  %arrayidx11 = getelementptr inbounds [1024 x double], ptr %frame2, i64 %indvars.iv57, i64 %indvars.iv
+  %1 = load double, ptr %arrayidx11, align 8, !tbaa !8
+  %mul14 = fmul double %1, 8.000000e+00
+  %2 = fsub double %0, %mul14
+  %arrayidx18 = getelementptr inbounds [1024 x double], ptr %frame3, i64 %indvars.iv57, i64 %indvars.iv
+  %3 = load double, ptr %arrayidx18, align 8, !tbaa !8
+  %4 = tail call double @llvm.fmuladd.f64(double %3, double 0.000000e+00, double %2)
+  %arrayidx24 = getelementptr inbounds [1024 x double], ptr %frame4, i64 %indvars.iv57, i64 %indvars.iv
+  %5 = load double, ptr %arrayidx24, align 8, !tbaa !8
+  %6 = tail call double @llvm.fmuladd.f64(double %5, double 8.000000e+00, double %4)
+  %arrayidx30 = getelementptr inbounds [1024 x double], ptr %frame5, i64 %indvars.iv57, i64 %indvars.iv
+  %7 = load double, ptr %arrayidx30, align 8, !tbaa !8
+  %8 = tail call double @llvm.fmuladd.f64(double %7, double -1.000000e+00, double %6)
+  %div = fdiv double %8, 1.200000e+01
+  %arrayidx36 = getelementptr inbounds [1024 x double], ptr %gradient_z, i64 %indvars.iv57, i64 %indvars.iv
+  store double %div, ptr %arrayidx36, align 8, !tbaa !8
+  %indvars.iv.next = add nuw nsw i64 %indvars.iv, 1
+  %exitcond.not = icmp eq i64 %indvars.iv.next, 1024
+  br i1 %exitcond.not, label %for.cond.cleanup3, label %for.body4, !llvm.loop !12
+}
+
+; Function Attrs: mustprogress nocallback nofree nosync nounwind speculatable willreturn memory(none)
+declare double @llvm.fmuladd.f64(double, double, double) #1
+
+attributes #0 = { mustprogress nofree nosync nounwind memory(argmem: readwrite) uwtable "min-legal-vector-width"="0" "no-trapping-math"="true" "stack-protector-buffer-size"="8" "target-cpu"="x86-64" "target-features"="+cmov,+cx8,+fxsr,+mmx,+sse,+sse2,+x87" "tune-cpu"="generic" }
+attributes #1 = { mustprogress nocallback nofree nosync nounwind speculatable willreturn memory(none) }
+
+!llvm.module.flags = !{!0, !1, !2, !3}
+!llvm.ident = !{!4}
+
+!0 = !{i32 1, !"wchar_size", i32 4}
+!1 = !{i32 8, !"PIC Level", i32 2}
+!2 = !{i32 7, !"PIE Level", i32 2}
+!3 = !{i32 7, !"uwtable", i32 2}
+!4 = !{!"clang version 18.0.0 (git@github.com:llvm/llvm-project.git bde5717d4638c27614d9d4a2e53df27087a69841)"}
+!5 = distinct !{!5, !6, !7}
+!6 = !{!"llvm.loop.mustprogress"}
+!7 = !{!"llvm.loop.unroll.disable"}
+!8 = !{!9, !9, i64 0}
+!9 = !{!"double", !10, i64 0}
+!10 = !{!"omnipotent char", !11, i64 0}
+!11 = !{!"Simple C++ TBAA"}
+!12 = distinct !{!12, !6, !7}

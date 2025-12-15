@@ -12,11 +12,16 @@ import pickle
 import numpy as np
 import copy
 
-# Add the path to the folder containing my_module
-sys.path.insert(0, os.path.abspath('/home/eeuser/Desktop/GRL-HLS/'))
+ROOT_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "..", ".."))
+GNN_MODELS_DIR = os.path.join(ROOT_DIR, "Models", "GNNModels")
+if GNN_MODELS_DIR not in sys.path:
+    sys.path.insert(0, GNN_MODELS_DIR)
 
 # Now you can import the function
-from GNNRL.GNN_Model import RGCN_Pytorch, GCN_Pytorch, PNA_Pytorch, HARP_Pytorch
+import RGCN_Pytorch
+import GCN_Pytorch
+import PNA_Pytorch
+# import HARP_Pytorch
 
 class light_HLS_env(gym.Env):
     def __init__(self, env_config):
@@ -92,10 +97,6 @@ class light_HLS_env(gym.Env):
         self.count = 0
         self.errs_log = ""
         
-        # self.delete_run_dir = env_config.get('delete_run_dir', True)
-        # self.init_with_passes = env_config.get('init_with_passes', False)
-        # self.log_result = env_config.get('log_results', False)
-        
         if run_dir:
             self.run_dir = run_dir + '_p' +str(os.getpid())
         else:
@@ -111,7 +112,6 @@ class light_HLS_env(gym.Env):
         if pgm_dir:
             os.mkdir(self.run_dir)
             shutil.copy2(pgm_dir+pgm, self.run_dir)
-            # shutil.copytree(pgm_dir, self.run_dir)
         self.pre_passes_str = ""
         self.pre_passes = getcycles.passes2indice(self.pre_passes_str)
         self.passes = []
@@ -174,7 +174,6 @@ class light_HLS_env(gym.Env):
         return rew, valid
     
     def get_observation(self, get_normalizer=False):
-        # feats = getfeatures.light_hls_run_stats(self.pgm_name, self.passes, self.run_dir)
         if self.feature_type == "static_feature":
             embeddings = getfeatures.extractnum_run_stats(self.pgm_name, [], path=self.run_dir)
             if get_normalizer:
@@ -183,7 +182,6 @@ class light_HLS_env(gym.Env):
         else:
             graphs = getfeatures.gnn_get_feature(self.pgm_name, self.pre_graphs, self.run_dir)
             self.pre_graphs = graphs
-            # deg = torch.tensor(graphs.num_edges / graphs.num_nodes)
             if self.feature_type == "rgcn":
                 rgcn = RGCN_Pytorch.GCCGraphInfer(in_channels=self.in_channels, out_channels=self.feature_len, num_relations=3)
                 rgcn.load_state_dict(self.check_point['model_state_dict'])

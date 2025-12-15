@@ -5,6 +5,9 @@ import subprocess
 import numpy as np
 from gym_env.envs.get_TestBench import get_random, get_test
 
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+RL_RESULTS_PATH = os.path.join(BASE_DIR, "gym_env", "envs", "RL_Results.xlsx")
+
 # opt_passes_str = "annotation2metdadata forceattrs inferattrs coro-early lower-expect simplifycfg sroa early-cse callsite-splitting openmp-opt ipsccp called-value-propagation globalopt typepromotion argpromotion instcombine aggressive-instcombine always-inline inliner-wrapper wholeprogramdevirt module-inline inline rpo-function-attrs openmp-opt-cgscc speculative-execution jump-threading correlated-propagation libcalls-shrinkwrap tailcallelim reassociate constraint-elimination loop-simplify lcssa loop-instsimplify loop-simplifycfg licm loop-rotate simple-loop-unswitch loop-idiom indvars loop-deletion loop-unroll-full vector-combine mldst-motion gvn sccp bdce adce memcpyopt dse move-auto-init coro-elide coro-split coro-cleanup deadargelim  elim-avail-extern recompute-globalsaa float2int lower-constant-intrinsics chr loop-distribute inject-tli-mappings loop-vectorize infer-alignment loop-load-elim slp-vectorizer loop-unroll alignment-from-assumptions loop-sink instsimplify div-rem-pairs constmerge cg-profile rel-lookup-table-converter annotation-remarks verify"
 passes_18 = "simplifycfg sroa early-cse ipsccp globalopt typepromotion instcombine speculative-execution jump-threading correlated-propagation reassociate loop-instsimplify loop-simplifycfg licm loop-rotate loop-idiom indvars loop-deletion mldst-motion gvn sccp bdce adce memcpyopt dse loop-vectorize loop-load-elim slp-vectorizer loop-unroll instsimplify"
 passes_10 = "simplifycfg sroa early-cse ipsccp globalopt type-promotion instcombine speculative-execution jump-threading correlated-propagation reassociate loop-instsimplify loop-simplifycfg licm loop-rotate loop-idiom indvars loop-deletion mldst-motion gvn sccp bdce adce memcpyopt dse loop-vectorize loop-load-elim slp-vectorizer loop-unroll instsimplify"
@@ -96,9 +99,10 @@ def print_data(data, path, testbench_type):
                     os.system(llvm_dis_command)
                     f.write(opt_passes[data[index]['passes'][pass_order]] + "\n")       
 
+
 def write_excel(data, rno):    
     import openpyxl
-    workbook = openpyxl.load_workbook("/home/eeuser/Desktop/GRL-HLS/GNNRL/RL_Model/gym_env/envs/RL_Results.xlsx")
+    workbook = openpyxl.load_workbook(RL_RESULTS_PATH)
     sheet = workbook.active
     index = 0
     for i in data:
@@ -108,7 +112,7 @@ def write_excel(data, rno):
         sheet.cell(row=rno+1, column=index+2, value=data[i]['cycle'])
         print(data[i]['cycle'])
         index += 1
-        workbook.save("/home/eeuser/Desktop/GRL-HLS/GNNRL/RL_Model/gym_env/envs/RL_Results.xlsx")
+        workbook.save(RL_RESULTS_PATH)
         
 def build_dataset(data, testbench_type):
     target_passes = []

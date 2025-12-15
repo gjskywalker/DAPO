@@ -141,7 +141,7 @@ int main(int argc, char **argv)
     print_info("Enable TargetIRAnalysis Pass");
 
     auto hi_separateconstoffsetfromgep =
-        new HI_SeparateConstOffsetFromGEP("HI_SeparateConstOffsetFromGEP", true);
+        new HI_SeparateConstOffsetFromGEP("HI_SeparateConstOffsetFromGEP", false);
     PM1.add(hi_separateconstoffsetfromgep);
     print_info("Enable HI_SeparateConstOffsetFromGEP Pass");
 
@@ -151,10 +151,11 @@ int main(int argc, char **argv)
 
     PM1.run(*Mod);
 
-    std::error_code EC;
-    llvm::raw_fd_ostream OS1("top_output0.bc", EC, llvm::sys::fs::OF_None);
-    WriteBitcodeToFile(*Mod, OS1);
-    OS1.flush();
+    // If debug
+    // std::error_code EC;
+    // llvm::raw_fd_ostream OS1("top_output0.bc", EC, llvm::sys::fs::OF_None);
+    // WriteBitcodeToFile(*Mod, OS1);
+    // OS1.flush();
 
     /*
         We use the following passes to create canonical loop form to simplify trip count analysis.
@@ -229,13 +230,14 @@ int main(int argc, char **argv)
     PM.add(scalarevolutionwrapperpass);
     print_info("Enable ScalarEvolutionWrapperPass Pass");
 
-    llvm::raw_fd_ostream OS2("top_output1.bc", EC, llvm::sys::fs::OF_None);
-    WriteBitcodeToFile(*Mod, OS2);
-    OS2.flush();
+    //If debug
+    // llvm::raw_fd_ostream OS2("top_output1.bc", EC, llvm::sys::fs::OF_None);
+    // WriteBitcodeToFile(*Mod, OS2);
+    // OS2.flush();
 
     auto hi_qor_estimator = new HI_qor_estimator(
         configFile_str.c_str(), "HI_qor_estimator", "BRAM_info",
-        top_str.c_str(), 1);
+        top_str.c_str(), 0);
     print_info("Enable HI_qor_estimator Pass");
     PM.add(hi_qor_estimator);
 
@@ -252,9 +254,10 @@ int main(int argc, char **argv)
 
     print_status("Writing LLVM IR to File");
 
-    llvm::raw_fd_ostream OS("top_output.bc", EC, llvm::sys::fs::OF_None);
-    WriteBitcodeToFile(*Mod, OS);
-    OS.flush();
+    //If debug
+    // llvm::raw_fd_ostream OS("top_output.bc", EC, llvm::sys::fs::OF_None);
+    // WriteBitcodeToFile(*Mod, OS);
+    // OS.flush();
 
     return 0;
 }

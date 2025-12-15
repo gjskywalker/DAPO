@@ -1,8 +1,10 @@
+import os
+from datetime import datetime
 import ray
 from ray import tune, train
 from ray.rllib.algorithms.ppo import PPOConfig
 from gym_env.envs.gym_multienv import HLSMultiEnv
-from gym_env.envs.get_TestBench import get_chstone, get_polybench, get_random
+from gym_env.envs.get_TestBench import get_random
 
 ray.init()
 
@@ -33,8 +35,11 @@ parser.add_argument("--bmidx", "-i", default=0)
 parser.add_argument("--modelpath", "-m", default="Embedding_model_RGCNConv.pth")
 args = parser.parse_args()
 
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+MODELS_DIR = os.path.join(BASE_DIR, "GNNModels", "models")
+
 env_config = {
-    'model_path' : "/home/eeuser/Desktop/GRL-HLS/GNNRL/GNN_Model/models/" + args.modelpath,
+    'model_path' : os.path.join(MODELS_DIR, args.modelpath),
     'normalize': False,
     'orig_and_normalize':False,
     'bm_name':'random_all',
@@ -75,7 +80,7 @@ config = (
 tuner = tune.Tuner(
     "PPO",
     run_config=train.RunConfig(
-        name="DATE25_PPO_"+args.feature+"_random_Training",
+        name=f"PPO_{args.feature}_random_{datetime.now().strftime('%Y%m%d_%H%M%S')}",
         checkpoint_config=train.CheckpointConfig(checkpoint_at_end=True, checkpoint_frequency=10),
         stop={"training_iteration":50},
     ),

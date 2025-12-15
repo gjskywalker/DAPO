@@ -69,30 +69,9 @@ class HLSMultiEnv(gym.Env):
                 self.observation_space = Box(0.00, 1.00, shape=(1, self.feature_len), dtype = np.float64)
         self.envs = []
         
-        # self.idx = np.random.randint(self.num_pgms)  # idx (int): random number between 0 and the number of programs we have to run.
-
         self.idx = 0
-        
-        if self.bm_name == "chstone":
-            from gym_env.envs.get_TestBench import get_chstone
-            bms = get_chstone(N=self.num_pgms)
-            for i, bm in enumerate(bms):
-                pgm, path = bm
-                env_conf = {}
-                env_conf['pgm'] = pgm
-                env_conf['pgm_dir'] = path
-                env_conf['run_dir'] = 'run_'+pgm.replace(".cc","")
-                env_conf['model_path'] = self.model_path
-                env_conf['feature_type'] = self.feature_type
-                env_conf['record_file'] = self.record_file
-                # env_conf['normalize'] = self.norm_obs
-                # env_conf['verbose'] = env_config.get('verbose',False)
-                # env_conf['orig_and_normalize'] = self.orig_norm_obs
-                # env_conf['log_obs_reward']=env_config.get('log_obs_reward',False)
-                # env_conf['log_results'] = env_config.get('log_results',False)
-                self.envs.append(light_HLS_env(env_conf))
 
-        elif self.bm_name == "random_all":
+        if self.bm_name == "random_all":
             from gym_env.envs.get_TestBench import get_random_all
             bms = get_random_all()
             for i, bm in enumerate(bms):
@@ -109,20 +88,6 @@ class HLSMultiEnv(gym.Env):
         elif self.bm_name == "random":
             from gym_env.envs.get_TestBench import get_random
             bms = get_random(idx=self.bm_idx, pgm_num=self.num_pgms)
-            for i, bm in enumerate(bms):
-                pgm, files = bm
-                env_conf = {}
-                env_conf['pgm'] = pgm
-                env_conf['pgm_dir'] = files
-                env_conf['run_dir'] = 'run_'+pgm.replace(".cc","")
-                env_conf['model_path'] = self.model_path
-                env_conf['feature_type'] = self.feature_type
-                env_conf['record_file'] = self.record_file
-                self.envs.append(light_HLS_env(env_config=env_conf))
-        
-        elif self.bm_name == "polybench":
-            from gym_env.envs.get_TestBench import get_polybench
-            bms = get_polybench(N=self.num_pgms)
             for i, bm in enumerate(bms):
                 pgm, files = bm
                 env_conf = {}

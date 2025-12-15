@@ -1,16 +1,18 @@
-import re
-import subprocess
 import os
+import re
+import shutil
+import subprocess
 from numpy import indices
-
-# O3_str = "targetlibinfo tti tbaa scoped-noalias assumption-cache-tracker profile-summary-info forceattrs inferattrs ipsccp globalopt domtree mem2reg deadargelim domtree basicaa aa instcombine simplifycfg pgo-icall-prom basiccg globals-aa prune-eh inline functionattrs argpromotion domtree sroa early-cse speculative-execution lazy-value-info jump-threading correlated-propagation simplifycfg domtree basicaa aa instcombine libcalls-shrinkwrap tailcallelim simplifycfg reassociate domtree loops loop-simplify lcssa-verification lcssa basicaa aa scalar-evolution loop-rotate licm loop-unswitch simplifycfg domtree basicaa aa instcombine loops loop-simplify lcssa-verification lcssa scalar-evolution indvars loop-idiom loop-deletion loop-unroll mldst-motion aa memdep gvn basicaa aa memdep memcpyopt sccp domtree demanded-bits bdce basicaa aa instcombine lazy-value-info jump-threading correlated-propagation domtree basicaa aa memdep dse loops loop-simplify lcssa-verification lcssa aa scalar-evolution licm postdomtree adce simplifycfg domtree basicaa aa instcombine barrier elim-avail-extern basiccg rpo-functionattrs globals-aa float2int domtree loops loop-simplify lcssa-verification lcssa basicaa aa scalar-evolution loop-rotate loop-accesses lazy-branch-prob lazy-block-freq opt-remark-emitter loop-distribute loop-simplify lcssa-verification lcssa branch-prob block-freq scalar-evolution basicaa aa loop-accesses demanded-bits lazy-branch-prob lazy-block-freq opt-remark-emitter loop-vectorize loop-simplify scalar-evolution aa loop-accesses loop-load-elim basicaa aa instcombine scalar-evolution demanded-bits slp-vectorizer simplifycfg domtree basicaa aa instcombine loops loop-simplify lcssa-verification lcssa scalar-evolution loop-unroll instcombine loop-simplify lcssa-verification lcssa scalar-evolution licm alignment-from-assumptions strip-dead-prototypes globaldce constmerge domtree loops branch-prob block-freq loop-simplify lcssa-verification lcssa basicaa aa scalar-evolution branch-prob block-freq loop-sink instsimplify verify write-bitcode"
-# opt_passes_str = "loweratomic loop-distribute sink correlated-propagation loop-unroll globalopt bdce deadargelim sccp loop-reduce lcssa verify simple-loop-unswitch forceattrs elim-avail-extern simplifycfg dse jump-threading indvars tailcallelim memcpyopt globaldce adce rpo-function-attrs break-crit-edges loop-load-elim loop-rotate licm inferattrs sroa instsimplify strip-nondebug lowerinvoke gvn instcombine loop-simplify strip loop-deletion alignment-from-assumptions loop-sink constmerge mem2reg ipsccp lowerswitch slp-vectorizer reassociate"
-# new_opt_passes_str = "simple-loop-unswitch rpo-function-attrs forceattrs sccpglobalopt forceattrs alignment-from-assumptions globaldce correlated-propagation loop-sink instcombine verify memcpyopt loop-simplify tailcallelim deadargelim elim-avail-extern inferattrs bdce licm dse slp-vectorizer ipsccp constmerge instsimplify simplifycfg jump-threading loop-load-elim adce lcssa loop-distribute"  
-# opt_passes_str = "annotation2metdadata forceattrs inferattrs coro-early lower-expect simplifycfg sroa early-cse callsite-splitting openmp-opt ipsccp called-value-propagation globalopt typepromotion argpromotion instcombine aggressive-instcombine always-inline inliner-wrapper wholeprogramdevirt module-inline inline rpo-function-attrs openmp-opt-cgscc speculative-execution jump-threading correlated-propagation libcalls-shrinkwrap tailcallelim reassociate constraint-elimination loop-simplify lcssa loop-instsimplify loop-simplifycfg licm loop-rotate simple-loop-unswitch loop-idiom indvars loop-deletion loop-unroll-full vector-combine mldst-motion gvn sccp bdce adce memcpyopt dse move-auto-init coro-elide coro-split coro-cleanup deadargelim  elim-avail-extern recompute-globalsaa float2int lower-constant-intrinsics chr loop-distribute inject-tli-mappings loop-vectorize infer-alignment loop-load-elim slp-vectorizer loop-unroll alignment-from-assumptions loop-sink instsimplify div-rem-pairs constmerge cg-profile rel-lookup-table-converter annotation-remarks verify"
-# old_passes_str = "correlated-propagation scalarrepl lowerinvoke strip strip-nondebug sccp globalopt gvn jump-threading globaldce loop-unswitch scalarrepl-ssa loop-reduce break-crit-edges loop-deletion reassociate lcssa codegenprepare memcpyopt functionattrs loop-idiom lowerswitch constmerge loop-rotate partial-inliner inline early-cse indvars adce loop-simplify instcombine simplifycfg dse loop-unroll lower-expect tailcallelim licm sink mem2reg prune-eh functionattrs ipsccp deadargelim sroa loweratomic terminate"
 
 passes_18 = "simplifycfg sroa early-cse ipsccp globalopt typepromotion instcombine speculative-execution jump-threading correlated-propagation reassociate loop-instsimplify loop-simplifycfg licm loop-rotate loop-idiom indvars loop-deletion mldst-motion gvn sccp bdce adce memcpyopt dse loop-vectorize loop-load-elim slp-vectorizer loop-unroll instsimplify"
 passes_10 = "simplifycfg sroa early-cse ipsccp globalopt type-promotion instcombine speculative-execution jump-threading correlated-propagation reassociate loop-instsimplify loop-simplifycfg licm loop-rotate loop-idiom indvars loop-deletion mldst-motion gvn sccp bdce adce memcpyopt dse loop-vectorize loop-load-elim slp-vectorizer loop-unroll instsimplify"
+
+ROOT_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "..", ".."))
+DATASET_DIR = os.path.join(ROOT_DIR, "Dataset")
+TRAININGSET_DIR = os.path.join(DATASET_DIR, "trainingset")
+CONFIG_PATH = os.path.join(ROOT_DIR, "config.txt")
+QOR_ESTIMATOR_BIN = os.path.join(ROOT_DIR, "Analysis_tools", "qor_estimator", "qor_estimator")
+FEATURE_TESTS_DIR = os.path.join(os.path.dirname(__file__), "Feature_Cycles_Tests")
 
 def qw(s):
   """
@@ -107,8 +109,63 @@ def passes2indice(passes):
         break
   return indices
 
-# The main reason to do this is harp accept a relatively old llvm version so we need to generate the corresponding IR based on that version. 
-def harp_mimic(pgm_name, pgm_path, opt_indice, run_path="."):
+
+def _ensure_run_path(path: str) -> str:
+  abs_path = os.path.abspath(path)
+  os.makedirs(abs_path, exist_ok=True)
+  return abs_path
+
+
+def _compile_bitcode(source_file: str, output_bc: str, opt_level: int = 0) -> subprocess.CompletedProcess:
+  clang_command = [
+      "clang",
+      f"-O{opt_level}",
+      "-Xclang",
+      "-disable-O0-optnone",
+      "-emit-llvm",
+      "-S",
+      source_file,
+      "-o",
+      output_bc,
+  ]
+  return subprocess.run(clang_command, capture_output=True, text=True)
+
+
+def _run_estimator(bitcode_path: str, pgm_name: str, run_path: str, opt_indices) -> tuple:
+  if not os.path.isfile(QOR_ESTIMATOR_BIN):
+    return 0, 0, f"qor_estimator not found at {QOR_ESTIMATOR_BIN}"
+  if not os.path.isfile(CONFIG_PATH):
+    return 0, 0, f"config file not found at {CONFIG_PATH}"
+
+  command = [
+      QOR_ESTIMATOR_BIN,
+      "dut",
+      CONFIG_PATH,
+      bitcode_path,
+  ]
+  proc = subprocess.run(command, capture_output=True, text=True)
+  if proc.returncode != 0:
+    return 0, 0, proc.stderr.strip() or "qor_estimator execution failed"
+
+  output = proc.stdout
+  latency_match = re.search(r"latency is (\d+)", output)
+  valid_match = re.search(r"\b(invalid|valid)\b", output)
+  if latency_match and valid_match:
+    if valid_match.group() == "valid":
+      return int(latency_match.group(1)), 1, ""
+    return 0, 0, "qor_estimator reported invalid design"
+
+  passes_desc = opt_indices if opt_indices is not None else []
+  errs_log = (
+      "There is something wrong when getting cycles"
+      + f" Current program {pgm_name}"
+      + f" Current rundir {run_path}"
+      + f" Current passes {passes_desc}"
+  )
+  return 0, 0, errs_log
+
+
+def light_hls_getHWCycles(pgm_name, pgm_path, opt_indice, run_path=None):
   """
   Examples :
     >>> print(getHWCycles(c_code, [“-correlated-propagation”, “-scalarrepl”, “-lowerinvoke”]))
@@ -126,162 +183,78 @@ def harp_mimic(pgm_name, pgm_path, opt_indice, run_path="."):
     (the second element doesn't matter).
 
   """
-  fail = 0
-  errs_log = ""
-  ga_seq = getPasses10(opt_indice) # in ga_seq are the new passes
-  new_passes = list(ga_seq)
-  IRfilePath = run_path+"/cycleIRfile/"
-  if os.path.exists(IRfilePath):
-    pass
-  else:
-  # rm_cmd = "rm -rf "+IRfilePath
-  # os.system(rm_cmd)
-    mkdir_cmd = "mkdir "+IRfilePath
-    os.system(mkdir_cmd)
-  # cp_cmd = "cp "+ pgm_path + pgm_name +".cc " +IRfilePath
-  # os.system(cp_cmd)
-  # This instruction is used to disable clang's optimization, and get an initial bitcode file.
-  clang_command = "clang-11 -O0 -Xclang -disable-O0-optnone -emit-llvm -S "+IRfilePath+pgm_name+".cc "+"-o "+IRfilePath+pgm_name+".0.v10.bc"
-  result_0 = subprocess.run(clang_command, shell=True, capture_output=True)
-  if result_0.returncode == 0:
-    length = len(new_passes)
-    if(length != 0):
-      for pass_order in range(0, length):
-        opt_command = "opt_10 --"+new_passes[pass_order]+" "+IRfilePath+pgm_name+'.'+str(pass_order)+".v10.bc -o "+IRfilePath+pgm_name+'.'+str(pass_order+1)+".v10.bc"
-        result_1 = subprocess.run(opt_command, shell=True, capture_output=True)
-        if result_1.returncode != 0:
-          pass_order = pass_order -1 
-          fail = 1
-          break
-       # In case, the first step fails, we need to rename the bc file to the ll file instead of . 
-      if (fail == 1 and length == 1):
-        mv_command = "mv "+IRfilePath+pgm_name+'.'+str(pass_order+1)+".v10.bc "+IRfilePath+pgm_name+"top.v10.ll"
-        os.system(mv_command)
-      else:
-        mv_command = "mv "+IRfilePath+pgm_name+'.'+str(pass_order+1)+".v10.bc "+IRfilePath+pgm_name+"top.v10.bc"
-        os.system(mv_command)
-        _2ir_command = "llvm-dis_10 " + IRfilePath + pgm_name + "top.v10.bc" + " -o " + IRfilePath + pgm_name + "top.v10.ll"
-        os.system(_2ir_command)
-      # cp1_command = "cp "+IRfilePath+'/'+"top.bc "+"/home/eeuser/Desktop/GRL-HLS/LLVM_Tutorial/Tests/AccelerationCycle/build"
-      # os.system(cp1_command) 
-    else:
-      mv_command = "mv "+IRfilePath+pgm_name+'.'+"0.v10.bc "+IRfilePath+pgm_name+"top.v10.ll"
-      os.system(mv_command)
-      # cp1_command = "cp "+IRfilePath+'/'+"top.bc "+"/home/eeuser/Desktop/GRL-HLS/LLVM_Tutorial/Tests/AccelerationCycle/build"
-      # os.system(cp1_command) 
-    
-  return None
-
-def light_hls_getHWCycles(pgm_name, pgm_path, opt_indice, run_path="."):
-  """
-  Examples :
-    >>> print(getHWCycles(c_code, [“-correlated-propagation”, “-scalarrepl”, “-lowerinvoke”]))
-    (55, True)
-
-  Args:
-    c_code (str): The file name of a code written in C programming language
-    Opt_indice (list, optional): opt_indice is a list of integers where each element represents the index of the pass to grab from opt_passes list. 
-    path (str): This parameter represents the path of the directory we are interested in. Defaults to current path.
-    sim (bool, optional): sim should be True if you want the arguments used to launch the process to be “make clean p v -s”, or sim should be False 
-      if you want the argument used to launch the process to be "make clean accelerationCycle -s". Defaults to False
-
-  Returns:
-    Returns a tuple where the first element is an integer that represents the number of cycle counts it took to run the synthesized circuit 
-    (the second element doesn't matter).
-
-  """
+  run_root = _ensure_run_path(run_path or FEATURE_TESTS_DIR)
   valid = 1
   errs_log = ""
-  ga_seq = getPasses18(opt_indice) # in ga_seq are the new passes
+  ga_seq = getPasses18(opt_indice)
   new_passes = list(ga_seq)
-  IRfilePath = run_path+"/cycleIRfile/"
-  rm_cmd = "rm -rf "+IRfilePath
-  os.system(rm_cmd)
-  mkdir_cmd = "mkdir "+IRfilePath
-  os.system(mkdir_cmd)
-  cp_cmd = "cp "+ pgm_path + pgm_name +".cc " +IRfilePath
-  os.system(cp_cmd)
-  # This instruction is used to disable clang's optimization, and get an initial bitcode file.
-  clang_command = "clang -O0 -Xclang -disable-O0-optnone -emit-llvm -S "+IRfilePath+pgm_name+".cc "+"-o "+IRfilePath+pgm_name+".0.bc"
-  result_0 = subprocess.run(clang_command, shell=True, capture_output=True)
-  if result_0.returncode == 0:
-    length = len(new_passes)
-    if(length != 0):
-      for pass_order in range(0, length):
-        opt_command = "opt -passes="+new_passes[pass_order]+" "+IRfilePath+pgm_name+'.'+str(pass_order)+".bc -o "+IRfilePath+pgm_name+'.'+str(pass_order+1)+".bc"
-        result_1 = subprocess.run(opt_command, shell=True, capture_output=True)
-        if result_1.returncode != 0:
-          pass_order = pass_order -1 
-          break
-      mv_command = "mv "+IRfilePath+pgm_name+'.'+str(pass_order+1)+".bc "+IRfilePath+pgm_name+"top.bc "
-      os.system(mv_command)
-      # cp1_command = "cp "+IRfilePath+'/'+"top.bc "+"/home/eeuser/Desktop/GRL-HLS/LLVM_Tutorial/Tests/AccelerationCycle/build"
-      # os.system(cp1_command) 
-    else:
-      mv_command = "mv "+IRfilePath+pgm_name+'.'+"0.bc "+IRfilePath+pgm_name+"top.bc "
-      os.system(mv_command)
-      # cp1_command = "cp "+IRfilePath+'/'+"top.bc "+"/home/eeuser/Desktop/GRL-HLS/LLVM_Tutorial/Tests/AccelerationCycle/build"
-      # os.system(cp1_command) 
-    
+  ir_dir = os.path.join(run_root, "cycleIRfile")
+  if os.path.exists(ir_dir):
+    shutil.rmtree(ir_dir)
+  os.makedirs(ir_dir, exist_ok=True)
 
-  #TODO: Use this new pass to run opt and get the bitcode file, and transfer the bc file to our cycle estimator to get the cycle
-  execute_command = "cd /home/eeuser/Desktop/GRL-HLS/LLVM_Tutorial/Tests/AccelerationCycle/build && ./AccelerationCycle dut ../config.txt " + IRfilePath + pgm_name + "top.bc"
-  proc = subprocess.Popen([execute_command], stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
-  (out, err) = proc.communicate()
-  latency_match = re.search(r"latency is (\d+)", out.decode("utf-8"))
-  valid_match = re.search(r"\b(invalid|valid)\b", out.decode("utf-8"))
-  if latency_match:
-    if valid_match:
-      if valid_match.group() == "valid":
-        hw_cycle = latency_match.group(1)
-        hw_cycle = int(hw_cycle)
-      elif valid_match.group() == "invalid":
-        hw_cycle = 0
-        valid = 0
+  source_file = os.path.join(os.path.abspath(pgm_path), f"{pgm_name}.cc")
+  if not os.path.isfile(source_file):
+    return 0, 0, f"Source file not found: {source_file}"
+
+  target_source = os.path.join(ir_dir, f"{pgm_name}.cc")
+  shutil.copy(source_file, target_source)
+
+  initial_bc = os.path.join(ir_dir, f"{pgm_name}.0.bc")
+  result_0 = _compile_bitcode(target_source, initial_bc, opt_level=0)
+  if result_0.returncode != 0:
+    return 0, 0, result_0.stderr.strip() or "clang failed to generate bitcode"
+
+  last_bc = initial_bc
+  for idx, pass_name in enumerate(new_passes):
+    next_bc = os.path.join(ir_dir, f"{pgm_name}.{idx + 1}.bc")
+    opt_command = [
+        "opt",
+        f"-passes={pass_name}",
+        last_bc,
+        "-o",
+        next_bc,
+    ]
+    result_1 = subprocess.run(opt_command, capture_output=True, text=True)
+    if result_1.returncode != 0:
+      errs_log = result_1.stderr.strip() or "opt failed"
+      valid = 0
+      break
+    last_bc = next_bc
+
+  top_bc_path = os.path.join(ir_dir, f"{pgm_name}top.bc")
+  if os.path.isfile(last_bc):
+    shutil.move(last_bc, top_bc_path)
   else:
-    errs_log = "There is something wrong when getting cycles" + " Current program {}".format(pgm_name) + " Current rundir {}".format(run_path) + " Current passes {}".format(opt_indice)
-    hw_cycle = 0
-    valid = 0
-    
-  return hw_cycle, valid, errs_log
+    shutil.copy(initial_bc, top_bc_path)
+
+  hw_cycle, valid_flag, estimator_err = _run_estimator(top_bc_path, pgm_name, run_root, opt_indice)
+  if estimator_err:
+    errs_log = estimator_err
+  return hw_cycle, valid_flag, errs_log
   
-def get_Ox_Cycles(pgm_name, pgm_path, Opt_level, run_path="."):
-  valid = 1
-  errs_log = ""
-  IRfilePath = run_path+"/cycleIRfile"
-  rm_cmd = "rm -rf "+IRfilePath
-  os.system(rm_cmd)
-  mkdir_cmd = "mkdir "+IRfilePath
-  os.system(mkdir_cmd)
-  cp_cmd = "cp "+ pgm_path + pgm_name +".cc " +IRfilePath
-  os.system(cp_cmd)
-  # This instruction is used to disable clang's optimization, and get an initial bitcode file.
-  clang_command = "clang -O"+str(Opt_level)+" -Xclang -disable-O0-optnone -emit-llvm -S "+IRfilePath+'/'+pgm_name+".cc "+"-o "+IRfilePath+'/'+pgm_name+".bc"
-  result_0 = subprocess.run(clang_command, shell=True, capture_output=True)
-  if result_0.returncode == 0:
-      mv_command = "mv "+IRfilePath+'/'+pgm_name+".bc "+IRfilePath+'/'+"top.bc "
-      os.system(mv_command)
-      cp1_command = "cp "+IRfilePath+'/'+"top.bc "+"/home/eeuser/Desktop/GRL-HLS/LLVM_Tutorial/Tests/AccelerationCycle/build" 
-      os.system(cp1_command)  
-      #TODO: Use this new pass to run opt and get the bitcode file, and transfer the bc file to our cycle estimator to get the cycle
-      execute_command = "cd /home/eeuser/Desktop/GRL-HLS/LLVM_Tutorial/Tests/AccelerationCycle/build && ./AccelerationCycle dut ../config.txt top.bc"
-      proc = subprocess.Popen([execute_command], stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
-      (out, err) = proc.communicate()
-      latency_match = re.search(r"latency is (\d+)", out.decode("utf-8"))
-      valid_match = re.search(r"\b(invalid|valid)\b", out.decode("utf-8"))
-      if latency_match:
-        if valid_match:
-          if valid_match.group() == "valid":
-            hw_cycle = latency_match.group(1)
-            hw_cycle = int(hw_cycle)
-          elif valid_match.group() == "invalid":
-            hw_cycle = 0
-            valid = 0
-      else:
-        errs_log = "There is something wrong when getting cycles" + " Current program {}".format(pgm_name) + " Current rundir {}".format(run_path)
-        hw_cycle = 0
-        valid = 0
-    
+def get_Ox_Cycles(pgm_name, pgm_path, Opt_level, run_path=None):
+  run_root = _ensure_run_path(run_path or FEATURE_TESTS_DIR)
+  ir_dir = os.path.join(run_root, "cycleIRfile")
+  if os.path.exists(ir_dir):
+    shutil.rmtree(ir_dir)
+  os.makedirs(ir_dir, exist_ok=True)
+
+  source_file = os.path.join(os.path.abspath(pgm_path), f"{pgm_name}.cc")
+  if not os.path.isfile(source_file):
+    return 0, 0, f"Source file not found: {source_file}"
+
+  target_source = os.path.join(ir_dir, f"{pgm_name}.cc")
+  shutil.copy(source_file, target_source)
+
+  output_bc = os.path.join(ir_dir, "top.bc")
+  temp_bc = os.path.join(ir_dir, f"{pgm_name}.bc")
+  result_0 = _compile_bitcode(target_source, temp_bc, opt_level=Opt_level)
+  if result_0.returncode != 0:
+    return 0, 0, result_0.stderr.strip() or "clang failed to generate bitcode"
+
+  shutil.move(temp_bc, output_bc)
+  hw_cycle, valid, errs_log = _run_estimator(output_bc, pgm_name, run_root, opt_indice=None)
   return hw_cycle, valid, errs_log
 
 def main():
@@ -372,19 +345,20 @@ def main():
   '''
   import pickle
   O3_info = {}
-  path = "/home/eeuser/Desktop/GRL-HLS/Dataset/trainingset/"
+  path = TRAININGSET_DIR
+  run_dir = _ensure_run_path(FEATURE_TESTS_DIR)
   for i in range(0, 80):
     pgm = "random" + str(i)
-    cycle, _, _ = get_Ox_Cycles(pgm_name=pgm, pgm_path="/home/eeuser/Desktop/GRL-HLS/Dataset/trainingset/", Opt_level=1 , run_path="/home/eeuser/Desktop/GRL-HLS/GNNRL/RL_Model/gym_env/envs/Feature_Cycles_Tests")
-    # cycle, _, _ = light_hls_getHWCycles(pgm_name=pgm.replace(".cc", ""), pgm_path=path, opt_indice=[], run_path="/home/eeuser/Desktop/GRL-HLS/GNNRL/RL_Model/gym_env/envs/Feature_Cycles_Tests")
+    cycle, _, _ = get_Ox_Cycles(pgm_name=pgm, pgm_path=path, Opt_level=1 , run_path=run_dir)
+    # cycle, _, _ = light_hls_getHWCycles(pgm_name=pgm.replace(".cc", ""), pgm_path=path, opt_indice=[], run_path=FEATURE_TESTS_DIR)
     cycles = {}
     cycles['cycle'] = cycle
     O3_info[pgm.replace(".cc", "")] = cycles
   with open("O1_info.pkl", "wb") as f:
     pickle.dump(O3_info, f)
   
-  # cycle, _, _ = light_hls_getHWCycles(pgm_name=c_code, pgm_path="/home/eeuser/Desktop/GRL-HLS/Dataset/testsset/test0/", opt_indice=indices, run_path="/home/eeuser/Desktop/GRL-HLS/GNNRL/RL_Model/gym_env/envs/Feature_Cycles_Tests")
-  # cycle, _, _ = get_Ox_Cycles(pgm_name=c_code, pgm_path="/home/eeuser/Desktop/GRL-HLS/Dataset/testsset/test0/", Opt_level=3 , run_path="/home/eeuser/Desktop/GRL-HLS/GNNRL/RL_Model/gym_env/envs/Feature_Cycles_Tests")
+  # cycle, _, _ = light_hls_getHWCycles(pgm_name=c_code, pgm_path=os.path.join(DATASET_DIR, "testsset", "test0"), opt_indice=indices, run_path=FEATURE_TESTS_DIR)
+  # cycle, _, _ = get_Ox_Cycles(pgm_name=c_code, pgm_path=os.path.join(DATASET_DIR, "testsset", "test0"), Opt_level=3 , run_path=FEATURE_TESTS_DIR)
   # print(cycle)
 
 def prune_passes(file_name: str) -> None:
@@ -400,7 +374,7 @@ def prune_passes(file_name: str) -> None:
       for n in reversed(range(pass_len)):
         buffer_pass = passes.pop(n)
         print(passes)
-        cycle, _, _ = light_hls_getHWCycles(pgm_name=i, pgm_path="/home/eeuser/Desktop/GRL-HLS/Dataset/trainingset/", opt_indice=passes, run_path="/home/eeuser/Desktop/GRL-HLS/GNNRL/RL_Model/gym_env/envs/Feature_Cycles_Tests")
+        cycle, _, _ = light_hls_getHWCycles(pgm_name=i, pgm_path=TRAININGSET_DIR, opt_indice=passes, run_path=_ensure_run_path(FEATURE_TESTS_DIR))
         print("Current Cycles: {}".format(cycle))
         if cycle > init_cycle or cycle == 0:
           passes.insert(n, buffer_pass)
@@ -414,32 +388,4 @@ def prune_passes(file_name: str) -> None:
 
 if __name__ == "__main__":
   main()
-  # Passes_cout = [ 0, 0, 0, 0, 0,33,33,15, 0, 0, 6, 0, 3, 6, 0,64, 0, 0,
-  # 0, 0, 0, 0, 0, 0, 2,20, 4, 0, 0, 3, 0, 0, 0, 2, 5,28,
-  # 40, 0, 4,15, 1,20, 0, 4,54, 1, 1, 2, 1, 7, 0, 0, 0, 0,
-  # 0, 0, 0, 0, 0, 0, 0, 0,17, 0, 1, 6,47, 0, 0, 3, 0, 0]
-  # opt_passes_str = "annotation2metdadata forceattrs inferattrs coro-early lower-expect simplifycfg sroa early-cse callsite-splitting openmp-opt ipsccp called-value-propagation globalopt typepromotion argpromotion instcombine aggressive-instcombine always-inline inliner-wrapper wholeprogramdevirt module-inline inline rpo-function-attrs openmp-opt-cgscc speculative-execution jump-threading correlated-propagation libcalls-shrinkwrap tailcallelim reassociate constraint-elimination loop-simplify lcssa loop-instsimplify loop-simplifycfg licm loop-rotate simple-loop-unswitch loop-idiom indvars loop-deletion loop-unroll-full vector-combine mldst-motion gvn sccp bdce adce memcpyopt dse move-auto-init coro-elide coro-split coro-cleanup deadargelim  elim-avail-extern recompute-globalsaa float2int lower-constant-intrinsics chr loop-distribute inject-tli-mappings loop-vectorize infer-alignment loop-load-elim slp-vectorizer loop-unroll alignment-from-assumptions loop-sink instsimplify"
-  # passes = tuple(opt_passes_str.split())
-  # pass_len = len(passes)
-  # for i in range(0, pass_len):
-  #   if Passes_cout[i] > 0:
-  #     print("Passes: {}".format(passes[i]) + " Count: {}".format(Passes_cout[i]))
-  # main()
-  
-    
-  # import openpyxl
-  # workbook = openpyxl.load_workbook("file_names.xlsx")
-  # sheet = workbook.active
-  # run_path = "/home/eeuser/Desktop/GRL-HLS/GNNRL/RL_Model/gym_env/envs/test"
-  # from get_TestBench import get_polybench, get_random, get_testset
-  # bms = get_testset()
-  # for i, bm in enumerate(bms):
-  #   pgm_name, pgm_path= bm
-  #   pgm_name = pgm_name.replace(".cc", "")
-  #   sheet.cell(row=9, column=i+2, value=pgm_name)
-  #   cycle, _, _ = get_Ox_Cycles(pgm_name=pgm_name, pgm_path=pgm_path, Opt_level=3, run_path=run_path)
-  #   sheet.cell(row=10, column=i+2, value=cycle)
-  #   workbook.save("file_names.xlsx")
-# ['simple-loop-unswitch', 'rpo-function-attrs', 'forceattrs', 'sccp','globalopt', 'forceattrs', 'alignment-from-assumptions', 'globaldce', 'correlated-propagation', 'loop-sink', 'instcombine', 'verify', 'memcpyopt', 'loop-simplify', 'tailcallelim', 'deadargelim', 'elim-avail-extern', 'inferattrs', 'bdce', 'licm', 'dse', 'slp-vectorizer', 'ipsccp', 'constmerge', 'instsimplify', 'simplifycfg', 'jump-threading', 'loop-load-elim', 'adce', 'lcssa', 'loop-distribute']  
-    
-# ['demanded-bits', 'scoped-noalias-aa', 'scalar-evolution', 'basic-aa', 'targetlibinfo', 'aa', 'block-freq', 'opt-remark-emit', 'domtree', 'memdep', 'simple-loop-unswitch', 'profile-summary', 'branch-prob', 'forceattrs', 'rpo-function-attrs', 'globals-aa', 'postdomtree', 'tbaa', 'loops', 'lazy-value-info', 'sccp']
+ 

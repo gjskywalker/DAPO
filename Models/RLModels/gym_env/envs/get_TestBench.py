@@ -1,35 +1,15 @@
-import os  
+import os
 from os.path import isfile, join
 from shutil import copyfile
 
-def lsFiles(path, with_dir=True):
-    """ 
-    Examples :
-        >>> print(lsFiles(path, False))
-        [file1.txt, file2.txt, file3.txt]
+_ROOT_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "..", ".."))
+_DATASET_DIR = os.path.join(_ROOT_DIR, "Dataset")
+_CROSS_VALIDATION_DIR = os.path.join(_DATASET_DIR, "Cross_Validation")
+_TRAININGSET_DIR = os.path.join(_DATASET_DIR, "trainingset")
+_POLYBENCH_DIR = os.path.join(_DATASET_DIR, "polybench")
+_CHSTONE_DIR = os.path.join(_DATASET_DIR, "chstone")
 
-        >>> print(lsFiles(path))
-        [path/file1.txt, path/file2.txt, path/file3.txt]
-
-    Args:
-        path (str): The path of the directory we are interested in.
-        with_dir (bool, optional): with_dir should be set to True if you want the returned list (files) to contain the files’ names from the given directory 
-        	(the parameter path) concatenated with the given path (the parameter path), or with_dir should be set to False if you want the returned list (files) 
-        	to only contain the files’ names .Defaults to True.
-
-    Returns:
- 		Returns a list of strings where each element is the name of a file in the given path (case when with_dir is False), or a list of strings where each 
- 		element is the given path concatenated with a file name (case when with_dir is True).
-
-    """
-
-    path = os.path.abspath(path)
-    files = [f for f in os.listdir(path) if isfile(join(path, f))]
-    if with_dir:
-      files = [join(path, f) for f in os.listdir(path) if isfile(join(path, f))]
-    return files
-
-def get_random(idx : int, pgm_num : int) -> list : 
+def get_random(idx: int, pgm_num: int) -> list:
   """
   Examples :
     >>> print(get_random())
@@ -46,11 +26,11 @@ def get_random(idx : int, pgm_num : int) -> list :
   Returns:
     Returns a list of N strings where each element is the path to a benchmark file.
   """
-  path="/home/eeuser/Desktop/GRL-HLS/Dataset/Cross_Validation/" + str(idx) + "/trainingset"
+  path = os.path.join(_CROSS_VALIDATION_DIR, str(idx), "trainingset")
   random_list = []
-  for i in range(0, pgm_num):
-    random_list.append(("random" + str(i) + ".cc", path+"/"))
-  return random_list 
+  for i in range(pgm_num):
+    random_list.append(("random" + str(i) + ".cc", os.path.join(path, "")))
+  return random_list
 
 def get_random_all() -> list:
   """
@@ -59,53 +39,13 @@ def get_random_all() -> list:
   Returns:
     list: A list of tuples where each tuple contains a file name and its corresponding path.
   """
-  path = "/home/eeuser/Desktop/GRL-HLS/Dataset/trainingset"
+  path = _TRAININGSET_DIR
   random_list = []
-  for i in range(0, 80):
-    random_list.append(("random" + str(i) + ".cc", path+"/"))
+  for i in range(80):
+    random_list.append(("random" + str(i) + ".cc", os.path.join(path, "")))
   return random_list
 
-def get_polybench(path = "/home/eeuser/Desktop/GRL-HLS/Dataset/polybench/", N=16, use_dir=True):
-  """
-  Returns a list of polybench benchmark files and their paths.
-  
-  Args:
-    path (str, optional): Path to polybench directory. Defaults to "/home/eeuser/Desktop/GRL-HLS/Dataset/polybench/".
-    N (int, optional): Number of benchmarks to select. Defaults to 16.
-    use_dir (bool, optional): If True, returns path as string; if False, returns path as list. Defaults to True.
-
-  Returns:
-    list: List of tuples (filename, path) for polybench benchmarks.
-  """
-  polybench = [
-    ("2mm","2mm"), 
-    ("3mm","3mm"),
-    ("adi","adi"), 
-    ("atax","atax"),
-    ("bicg","bicg"),  
-    ("covariance","covariance"), 
-    ("doitgen","doitgen"), 
-    ("fdtd-2d","fdtd-2d"), 
-    ("gemm","gemm"), 
-    ("gemver","gemver"), 
-    ("gesummv","gesummv"), 
-    ("heat-3d", "heat-3d"),
-    ("jacobi-1d","jacobi-1d"), 
-    ("jacobi-2d", "jacobi-2d"), 
-    ("mvt","mvt"), 
-    ("seidel-2d","seidel-2d"), 
-  ]
-  polybench_list = []
-  for key, value in polybench:
-    if use_dir:
-      polybench_list.append((value+".cc", path+key+"/"))
-    else:
-      files = lsFiles(path+key)
-      polybench_list.append((value+".cc", files))
-  
-  return polybench_list[:N]
-
-def get_test(idx : int, pgm_num : int) -> list : 
+def get_test(idx: int, pgm_num: int) -> list:
   """
   Examples :
     >>> print(get_random())
@@ -122,64 +62,9 @@ def get_test(idx : int, pgm_num : int) -> list :
   Returns:
     Returns a list of N strings where each element is the path to a benchmark file.
   """
-  path="/home/eeuser/Desktop/GRL-HLS/Dataset/Cross_Validation/" + str(idx) + "/testset"
+  path = os.path.join(_CROSS_VALIDATION_DIR, str(idx), "testset")
   random_list = []
-  for i in range(0, pgm_num):
-    random_list.append(("test" + str(i) + ".cc", path+"/"))
-  return random_list 
+  for i in range(pgm_num):
+    random_list.append(("test" + str(i) + ".cc", os.path.join(path, "")))
+  return random_list
                             
-def get_chstone(path = "/home/eeuser/Desktop/GRL-HLS/Dataset/chstone", N=12, use_dir=True):
-  """
-  Examples :
-    >>> print(get_chstone())
-    [("adpcm.c","path/adpcm/"), ("aes.c","path/aes/"), ("bf.c","path/blowfish/"), ("dfadd.c","path/dfadd/"),("dfdiv.c","path/dfdiv/"), 
-    ("dfmul.c","path/dfmul/"), ("dfsin.c","path/dfsin/"), ("gsm.c","path/gsm/"), ("main.c","path/jpeg/"), ("mips.c","path/mips/"), 
-    ("mpeg2.c","path/motion/"), ("sha_driver.c","path/sha/")]   
-    >>> print(get_random(“path/to/dir/”))
-    [("adpcm.c","path/to/dir/adpcm/"), ("aes.c","path/to/dir/aes/"), ("bf.c","path/to/dir/blowfish/"), ("dfadd.c","path/to/dir/dfadd/"), 
-    ("dfdiv.c","path/to/dir/dfdiv/"),  ("dfmul.c","path/to/dir dfmul/"), ("dfsin.c","path/to/dir/dfsin/"), ("gsm.c","path/to/dir/gsm/"), 
-    ("main.c","path/to/dir/jpeg/"), ("mips.c","path/to/dir/mips/"), ("mpeg2.c","path/to/dir/motion/"), ("sha_driver.c","path/to/dir/sha/")]   
-
-    >>> print(get_random(“path/to/directory”, 6))
-    [("adpcm.c","path/to/dir/adpcm/"), ("aes.c","path/to/dir/aes/"), ("bf.c","path/to/dir/blowfish/"), ("dfadd.c","path/to/dir/dfadd/"), 
-    ("dfdiv.c","path/to/dir/dfdiv/"),  ("dfmul.c","path/to/dir dfmul/")]
-
-    >>> print(get_random(“path/to/directory”, 6, False))
-    [("adpcm.c",["path/to/dir/adpcm/"]), ("aes.c",["path/to/dir/aes/"]), ("bf.c",["path/to/dir/blowfish/"]), ("dfadd.c",["path/to/dir/dfadd/"]), 
-    ("dfdiv.c",["path/to/dir/dfdiv/"]),  ("dfmul.c",["path/to/dir dfmul/"])]
-
-  Args:
-    path (str, optional): Path to the chstone_path directory that contains chstone benchmarks. Defaults to chstone_path.
-    N (int, optional): N is the number of benchmarks to select from the chstone list. Defaults to twelve.
-    use_dir(bool, optional): use_dir should be set to True if you want the tuple path (given path + “benchmark_name”) in the returned list (chstone_list) 
-      to as a string, or use_dir should be set to False if you want the tuple path (given path + “benchmark_name”) in the returned list (chstone_list) to 
-      be as a string in a list. Defaults to True.
-
-  Returns:
-      Returns a list of tuples where each tuple(“string”, [“string”] ) contains as the first element a file written in the C programming language(chstone_benchmark_name.c from the chstone list) and as the second element a list that contains the same chstone benchmark name (case when use_dir is False). However, for the case when use_dir is True, this function returns a list of tuples where each tuple(“string”, “string”) contains as the first element a file written in the C programming language (chstone_benchmark_name.c from the chstone list)  and as the second element the same chstone benchmark name concatenated with the given path.
-  """
-
-  chstone = [
- ( "adpcm","adpcm"),
- ( "aes","aes"),
- ( "bf","bf"),
- ( "dfadd","dfadd"),
- ( "dfdiv","dfdiv"),
- ( "dfmul","dfmul"),
- ( "dfsin","dfsin"),
- ( "gsm","gsm"),
- ( "jpeg","jpeg"),
- ( "mips","mips"),
- ( "motion","mpeg2"),
- ( "sha","sha")
-  ]
-
-  chstone_list = []
-  for key, value in chstone:
-    if use_dir: 
-      chstone_list.append((value+".cc", path+key+"/"))
-    else: 
-      files = lsFiles(path+key) 
-      chstone_list.append((value+".cc", files))
-  return chstone_list[:N]
-

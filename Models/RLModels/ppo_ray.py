@@ -1,3 +1,5 @@
+import os
+from datetime import datetime
 import ray
 from ray import tune, train
 from ray.rllib.algorithms.ppo import PPOConfig
@@ -35,6 +37,8 @@ parser.add_argument("--feature", "-f")
 parser.add_argument("--record", "-r")
 parser.add_argument("--modelpath", "-m")
 args = parser.parse_args()
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+MODELS_DIR = os.path.join(BASE_DIR, "GNNModels", "models")
 for i, bm in enumerate(trainsets):
     pgm, path = bm
     env_config["pgm"] = pgm
@@ -42,7 +46,7 @@ for i, bm in enumerate(trainsets):
     env_config["run_dir"] = 'run_random' + str(i)
     env_config["feature_type"] = args.feature
     env_config["record_file"] = args.record
-    env_config['model_path'] = "/home/eeuser/Desktop/GRL-HLS/GNNRL/GNN_Model/models/" + args.modelpath
+    env_config['model_path'] = os.path.join(MODELS_DIR, args.modelpath)
     config = (
             PPOConfig()
             .training(
@@ -74,7 +78,7 @@ for i, bm in enumerate(trainsets):
     tuner = tune.Tuner(
         "PPO",
         run_config=train.RunConfig(
-            name="ICCAD25_PPO_"+args.feature+"_random_Training",
+            name=f"PPO_{args.feature}_random_{datetime.now().strftime('%Y%m%d_%H%M%S')}",
             checkpoint_config=train.CheckpointConfig(checkpoint_at_end=True, checkpoint_frequency=10),
             stop={"training_iteration":50},
         ),

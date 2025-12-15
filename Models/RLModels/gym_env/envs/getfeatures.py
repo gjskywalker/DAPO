@@ -1,27 +1,42 @@
+import os
+import re
+import shutil
 import subprocess
 import numpy as np
 import pandas as pd
-# import networkx as nx
 import torch
 from torch_geometric.data import Data
-# import stellargraph as sg
-from subprocess import call
-# from tensorflow import keras
-# from gym_env.envs.getcycles import *
-# from get_TestBench import get_random
-import os
-import re 
+from gym_env.envs.get_TestBench import get_random
 
 features = ["Number of BB where total args for phi nodes > 5", "Number of BB where total args for phi nodes is [1, 5]", "Number of BB's with 1 predecessor", "Number of BB's with 1 predecessor and 1 successor", "Number of BB's with 1 predecessor and 2 successors", "Number of BB's with 1 successor", "Number of BB's with 2 predecessors", "Number of BB's with 2 predecessors and 1 successor", "Number of BB's with 2 predecessors and successors", "Number of BB's with 2 successors", "Number of BB's with >2 predecessors", "Number of BB's with Phi node Number in range (0, 3]", "Number of BB's with more than 3 Phi nodes", "Number of BB's with no Phi nodes", "Number of Phi-nodes at beginning of BB", "Number of branches", "Number of calls that return an int", "Number of critical edges", "Number of edges", "Number of occurrences of 32-bit integer constants", "Number of occurrences of 64-bit integer constants", "Number of occurrences of constant 0", "Number of occurrences of constant 1", "Number of unconditional branches", "Binary operations with a constant operand", "Number of AShr insts", "Number of Add insts", "Number of Alloca insts", "Number of And insts", "Number of BB's with instructions between [15, 500]", "Number of BB's with less than 15 instructions", "Number of BitCast insts", "Number of Br insts", "Number of Call insts", "Number of GetElementPtr insts", "Number of ICmp insts", "Number of LShr insts", "Number of Load insts", "Number of Mul insts", "Number of Or insts", "Number of PHI insts", "Number of Ret insts", "Number of SExt insts", "Number of Select insts", "Number of Shl insts", "Number of Store insts", "Number of Sub insts", "Number of Trunc insts", "Number of Xor insts", "Number of ZExt insts", "Number of basic blocks", "Number of instructions (of all types)", "Number of memory instructions", "Number of non-external functions", "Total arguments to Phi nodes", "Unary"] 
 
-def extractnum_run_stats(pgm_name, opt_indice, path="."):
-  IRfilePath = path+"/cycleIRfile"
-  execute_cmd = "cd /home/eeuser/Desktop/GRL-HLS/LLVM_Tutorial/Tests/NumExtractor/build && ./ExtraNum " + IRfilePath + "/" + pgm_name + "top.bc" 
-  proc = subprocess.Popen([execute_cmd], stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
-  (out, err) = proc.communicate()
-  # print (err)
-  m = get_static_features_str(err)
-  return m
+ROOT_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "..", ".."))
+ANALYSIS_TOOLS_DIR = os.path.join(ROOT_DIR, "Analysis_tools")
+FEATURE_EXTRACTOR_BIN = os.path.join(ANALYSIS_TOOLS_DIR, "feature_exctractor", "feature_exctractor")
+FEATURE_TESTS_DIR = os.path.join(os.path.dirname(__file__), "Feature_Cycles_Tests")
+DEFAULT_CYCLE_IR_DIR = os.path.join(FEATURE_TESTS_DIR, "cycleIRfile")
+
+
+def _ensure_cycle_ir_dir(base_path: str) -> str:
+  abs_base = os.path.abspath(base_path)
+  ir_dir = os.path.join(abs_base, "cycleIRfile")
+  os.makedirs(ir_dir, exist_ok=True)
+  return ir_dir
+
+
+def _compile_bitcode(source_file: str, output_bc: str, opt_level: int = 0) -> subprocess.CompletedProcess:
+  clang_cmd = [
+    "clang",
+    f"-O{opt_level}",
+    "-Xclang",
+    "-disable-O0-optnone",
+    "-emit-llvm",
+    "-S",
+    source_file,
+    "-o",
+    output_bc,
+  ]
+  return subprocess.run(clang_cmd, capture_output=True, text=True)
 
 def get_static_features_str(out):
     """ 
@@ -94,54 +109,95 @@ def read_file(edge_file, node_file):
 
 def harp_get_feature(pgm_name, pre_graphs, path="."):
   from Program_Representation_Learning.HarpEncoder import IR2Graph, graph2tensor
+
   pregraph = pre_graphs
-  IRfilePath = path + "/cycleIRfile/"
-  return graph2tensor(IR2Graph(IRfilePath + pgm_name + "top.v10.ll"))[0]
+  ir_dir = _ensure_cycle_ir_dir(path)
+  ll_path = os.path.join(ir_dir, f"{pgm_name}top.v10.ll")
+  return graph2tensor(IR2Graph(ll_path))[0]
   
 def ir2vec_get_feature(pgm_name, pre_graphs, path="."):
   pregraph = pre_graphs
-  IRfilePath = path + "/cycleIRfile/"
-  execute_cmd = "cd " + IRfilePath + " && ir2vec -fa -dim 75 -o embedding.txt -level p " + pgm_name + "top.bc"
-  result = subprocess.run(execute_cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
-  if result.returncode == 0:
-    with open(IRfilePath + "embedding.txt", 'r') as file:
-        # Read the first line of the file
-        line = file.readline().strip()
-        # Split the line into a list of floats and convert to a numpy array
-        embedding_vector = np.array([float(x) for x in line.split()])
-        rmc = "rm " + IRfilePath + "embedding.txt"
-        os.system(rmc)
-        return embedding_vector.reshape(1, -1)
+  ir_dir = _ensure_cycle_ir_dir(path)
+  embedding_path = os.path.join(ir_dir, "embedding.txt")
+  top_bc = os.path.join(ir_dir, f"{pgm_name}top.bc")
+
+  result = subprocess.run(
+    [
+      "ir2vec",
+      "-fa",
+      "-dim",
+      "75",
+      "-o",
+      embedding_path,
+      "-level",
+      "p",
+      top_bc,
+    ],
+    cwd=ir_dir,
+    capture_output=True,
+    text=True,
+  )
+  if result.returncode == 0 and os.path.isfile(embedding_path):
+    with open(embedding_path, "r", encoding="utf-8") as file:
+      line = file.readline().strip()
+      embedding_vector = np.array([float(x) for x in line.split()])
+    os.remove(embedding_path)
+    return embedding_vector.reshape(1, -1)
+  return pregraph
 
 def gnn_get_feature(pgm_name, pre_graphs, path="."):
   pregraph = pre_graphs
-  IRfilePath = path + "/cycleIRfile/"
-  # cp_cmd = "cp " + IRfilePath + "top.bc /home/eeuser/Desktop/GRL-HLS/LLVM_Tutorial/Tests/FeatureExtractor/build"
-  # os.system(cp_cmd)
-  execute_cmd = "cd /home/eeuser/Desktop/GRL-HLS/LLVM_Tutorial/Tests/FeatureExtractor/build && ./FeatureExtractor_V5 " + IRfilePath + " " +pgm_name + " " + IRfilePath + pgm_name + "top.bc" 
-  result = subprocess.run(execute_cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
-  if result.returncode == 0:
-    # cp1_command = "cp /home/eeuser/Desktop/GRL-HLS/LLVM_Tutorial/Tests/FeatureExtractor/build/Edge_"+pgm_name+".csv " + IRfilePath
-    # os.system(cp1_command)
-    # cp2_command = "cp /home/eeuser/Desktop/GRL-HLS/LLVM_Tutorial/Tests/FeatureExtractor/build/Node_Feature_"+pgm_name+".csv " + IRfilePath
-    # os.system(cp2_command)
-    graph = read_file(IRfilePath + "Edge_"+pgm_name+".csv", IRfilePath + "Node_Feature_"+pgm_name+".csv")
-    return graph
-  else:
+  if not os.path.isfile(FEATURE_EXTRACTOR_BIN):
     return pregraph
+
+  ir_dir = _ensure_cycle_ir_dir(path)
+  top_bc = os.path.join(ir_dir, f"{pgm_name}top.bc")
+  command = [
+    FEATURE_EXTRACTOR_BIN,
+    ir_dir,
+    pgm_name,
+    top_bc,
+  ]
+  result = subprocess.run(
+    command,
+    cwd=os.path.dirname(FEATURE_EXTRACTOR_BIN),
+    capture_output=True,
+    text=True,
+  )
+  if result.returncode == 0:
+    edge_path = os.path.join(ir_dir, f"Edge_{pgm_name}.csv")
+    node_path = os.path.join(ir_dir, f"Node_Feature_{pgm_name}.csv")
+    if os.path.isfile(edge_path) and os.path.isfile(node_path):
+      return read_file(edge_path, node_path)
+  return pregraph
 
 def main():
     training_set = get_random(idx=0, pgm_num=70)
     Embeddings_static = list()
-    for (pgm, path) in training_set:
-      os.system("cp " + path + pgm + " /home/eeuser/Desktop/GRL-HLS/GNNRL/RL_Model/gym_env/envs/Feature_Cycles_Tests/cycleIRfile/ ")
-      os.system("cd /home/eeuser/Desktop/GRL-HLS/GNNRL/RL_Model/gym_env/envs/Feature_Cycles_Tests/cycleIRfile/ && clang -O0 -Xclang -disable-O0-optnone -emit-llvm -S " + pgm + " -o " + pgm.replace(".cc", "") + "top.bc")
-      m = extractnum_run_stats(pgm_name=pgm.replace(".cc", ""), opt_indice=[], path="/home/eeuser/Desktop/GRL-HLS/GNNRL/RL_Model/gym_env/envs/Feature_Cycles_Tests/")
-      # m = gnn_get_feature(c_code,indices,path="/home/eeuser/Desktop/GRL-HLS/GNNRL/RL_Model/gym_env/envs/Feature_Cycles_Tests/")
+    ir_dir = _ensure_cycle_ir_dir(FEATURE_TESTS_DIR)
+    for pgm, pgm_path in training_set:
+      source_file = os.path.join(pgm_path, pgm)
+      if not os.path.isfile(source_file):
+        continue
+
+      target_source = os.path.join(ir_dir, pgm)
+      shutil.copy(source_file, target_source)
+
+      bitcode_name = pgm.replace(".cc", "") + "top.bc"
+      bitcode_path = os.path.join(ir_dir, bitcode_name)
+      compile_result = _compile_bitcode(target_source, bitcode_path, opt_level=0)
+      if compile_result.returncode != 0:
+        continue
+
+      m = extractnum_run_stats(
+        pgm_name=pgm.replace(".cc", ""),
+        opt_indice=[],
+        path=FEATURE_TESTS_DIR,
+      )
       Embeddings_static.append(m)
-    import pickle
-    with open("Embeddings_static.pkl", "wb") as fp:
-      pickle.dump(Embeddings_static, fp)
+      import pickle
+      with open("Embeddings_static.pkl", "wb") as fp:
+        pickle.dump(Embeddings_static, fp)
 
 if __name__ == "__main__":
     main() 

@@ -60,6 +60,7 @@ config = (
     )
 # Load the trained model for inference
 trained_agent = config.build()
+# Before restoring, ensure the correct path to the checkpoint is provided
 trained_agent.restore("")
 
 count = 0

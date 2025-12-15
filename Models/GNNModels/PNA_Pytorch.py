@@ -7,13 +7,19 @@ import pickle
 import matplotlib.pyplot as plt
 from torch.utils.data import Dataset
 
-
-
 class GraphDataset(Dataset):
     def __init__(self, graph_data, graph_pair_idx, targets):
         self.graph_data = graph_data
         self.graph_pair_idx = graph_pair_idx
-        self.targets = targets
+        if isinstance(targets, dict):
+            self.targets = []
+            for pair in graph_pair_idx:
+                key = tuple(pair)
+                if key not in targets:
+                    raise KeyError(f"Missing target for pair {key}")
+                self.targets.append(targets[key])
+        else:
+            self.targets = list(targets)
         
     def __len__(self):
         return len(self.graph_pair_idx)
@@ -22,7 +28,7 @@ class GraphDataset(Dataset):
         graph_idx1, graph_idx2 = self.graph_pair_idx[idx]
         graph1 = self.graph_data[graph_idx1]
         graph2 = self.graph_data[graph_idx2]
-        target = self.targets[idx]
+        target = torch.tensor(self.targets[idx], dtype=torch.float32)
         return graph1, graph2, target
 
 class GCCGraphInfer(nn.Module):
@@ -90,18 +96,18 @@ if __name__ == "__main__":
     parser.add_argument('--patience', required=True, type=int)
     
     args = parser.parse_args()
-    with open('/home/eeuser/Desktop/GRL-HLS/GNNRL/GNN_Model/GED_Result_Dapo/Dapo_indexes.pkl', 'rb') as fp:
+    with open('HGED_Result_Dapo/Dapo_indexes.pkl', 'rb') as fp:
         graph_pair_idx = pickle.load(fp)
-    with open('/home/eeuser/Desktop/GRL-HLS/GNNRL/GNN_Model/GED_Result_Dapo/Dapo_GED_Result.pkl', 'rb') as fp:
+    with open('HGED_Result_Dapo/Dapo_HGED_Result.pkl', 'rb') as fp:
         targets = pickle.load(fp)
     
-    fp = open("/home/eeuser/Desktop/GRL-HLS/GNNRL/GNN_Model/Graph_Dapo/graphs_random_dataset_pytorch.pkl", "rb")
+    fp = open("Graph_Dapo/graphs_random_dataset_pytorch.pkl", "rb")
     graph_data = pickle.load(fp)
 
     dummy_loader = DataLoader(graph_data, batch_size=1)  # Dummy loader for histogram computation
     deg = PNAConv.get_degree_histogram(dummy_loader)
     dataset = GraphDataset(graph_data, graph_pair_idx, targets)
-    train_loader = DataLoader(dataset, batch_size=32, shuffle=True)
+    train_loader = DataLoader(dataset, batch_size=32, shuffle=True, drop_last=True)
     edge_dim = 3 
     in_channels = 12 
     out_channels = 32

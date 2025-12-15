@@ -1,9 +1,36 @@
-import os 
+import os
 import pickle
+import random
 import networkx as nx
 import numpy as np
-from multiprocessing import Process, Manager
+from itertools import combinations
+from multiprocessing import get_context
 from typing import List, Tuple, Dict, Any, Optional, Union
+
+_SHARED_GRAPHS: Optional[List[nx.DiGraph]] = None
+_SHARED_HGED: Optional["HGED"] = None
+
+
+def _worker_init(graphs: List[nx.DiGraph], verbose: bool) -> None:
+    """Initialize shared state for each worker process."""
+    global _SHARED_GRAPHS, _SHARED_HGED
+    _SHARED_GRAPHS = graphs
+    _SHARED_HGED = HGED("", "", "", "", verbose=verbose)
+
+
+def _worker_compute(pair: Tuple[int, int]) -> Tuple[Tuple[int, int], Optional[float]]:
+    """Compute distance for a single pair using shared graphs."""
+    if _SHARED_GRAPHS is None or _SHARED_HGED is None:
+        return pair, None
+    left, right = pair
+    distance = _SHARED_HGED._compute_distance(
+        left,
+        right,
+        _SHARED_GRAPHS,
+        _SHARED_HGED._dapo_node_substitute,
+        _SHARED_HGED._dapo_edge_substitute,
+    )
+    return pair, distance
 
 class HGED():
     
@@ -92,10 +119,12 @@ class HGED():
         else:
             return 1
 
-    def _compute_distance(self, left: int, right: int, graphs: List[nx.DiGraph], 
-                         node_substitute: callable, edge_substitute: callable) -> Dict[Tuple[int, int], List[Optional[float]]]:
-        return_dict = dict()
-        with open("Graph_Info.txt", "w") as f:
+    def _compute_distance(self, left: int, right: int, graphs: List[nx.DiGraph],
+                         node_substitute: callable, edge_substitute: callable) -> Optional[float]:
+        total_distance: Optional[float] = None
+        os.makedirs("HGED_Result_Dapo", exist_ok=True)
+        info_path = os.path.join("HGED_Result_Dapo", f"Graph_Info_{left}_{right}.txt")
+        with open(info_path, "w") as f:
             f.write(f"==== CDFG LEFT (index {left}) ====" + "\n")
             for node in graphs[left].nodes(data=True):
                 f.write(f"Node: {node[0]}, Attr: {str(node[1]['nodeattr'])}\n")
@@ -136,9 +165,15 @@ class HGED():
 
         CFG_distance = nx.graph_edit_distance(CFG_left, CFG_right, node_subst_cost=node_substitute, edge_subst_cost=edge_substitute, timeout=60)
         DFG_distance = nx.graph_edit_distance(DFG_left, DFG_right, node_subst_cost=node_substitute, edge_subst_cost=edge_substitute, timeout=60)
-        if CFG_distance and DFG_distance:
-            return_dict[(left, right)] = [CFG_distance, DFG_distance]
-        return return_dict
+
+        if CFG_distance is not None and DFG_distance is not None:
+            total_distance = CFG_distance + DFG_distance
+        elif CFG_distance is not None:
+            total_distance = CFG_distance
+        elif DFG_distance is not None:
+            total_distance = DFG_distance
+
+        return total_distance
 
     def _generate_control_flow_graph(self, graph: nx.DiGraph) -> nx.DiGraph:
         CFG = nx.DiGraph()
@@ -167,97 +202,50 @@ class HGED():
         return DFG
 
     def dapo_generate_hged(self, graphs_file:str, HGED_Result_file:str, log_file:str, indexes_file:str) -> None:
-        if os.path.exists('HGED_Result_Dapo'):
-            pass
-        else:
-            os.system("mkdir HGED_Result_Dapo")
-        directory = "HGED_Result_Dapo/"
-        fp = open(graphs_file, "rb")
-        graphs = pickle.load(fp)
-        print(len(graphs))
-        print("Generating HGED for DAPO method...")
-        print(self._compute_distance(0, 1, graphs, self._dapo_node_substitute, self._dapo_edge_substitute))
-        # graph_idx = np.random.RandomState(0).randint(len(graphs)-1, size=(28800, 2))
-        # targets = []
-        # index = []
+        os.makedirs('HGED_Result_Dapo', exist_ok=True)
+        with open(graphs_file, "rb") as fp:
+            graphs = pickle.load(fp)
 
-        # for i in range(0, 960):
-        #     processes = []
-        #     manager = Manager()
-        #     return_dict = manager.dict()
+        try:
+            with open(indexes_file, "rb") as idx_fp:
+                index_pairs = pickle.load(idx_fp)
+        except FileNotFoundError:
+            index_pairs = None
 
-        #     for left, right in graph_idx[i*30 : (i+1)*30]:
-        #         p = Process(target=self._compute_distance, args=(left, right, graphs, self._dapo_node_substitute, self._dapo_edge_substitute, return_dict))
-        #         p.start()
-        #         processes.append(p)
+        normalized_pairs: List[Tuple[int, int]] = []
+        if isinstance(index_pairs, (list, tuple)):
+            for pair in index_pairs:
+                if isinstance(pair, (list, tuple)) and len(pair) == 2:
+                    left, right = pair
+                    try:
+                        normalized_pairs.append((int(left), int(right)))
+                    except (TypeError, ValueError):
+                        continue
+        if not normalized_pairs:
+            all_pairs = list(combinations(range(len(graphs)), 2))
+            random.shuffle(all_pairs)
+            normalized_pairs = all_pairs
 
-        #     for p in processes:
-        #         p.join()
-                
-        #     for key, distance in return_dict.items():
-        #         index.append((key[0], key[1]))
-        #         targets.append(distance)
-            
-        # with open(directory + log_file, "w") as result:
-        #     for (left, right), distance in zip(index, targets):
-        #         print(f"{left}, {right} : {distance}", file=result)
+        results: Dict[Tuple[int, int], Optional[float]] = {}
+        workers = min(16, max(1, len(normalized_pairs)))
+        ctx = get_context("spawn")
 
-        # with open(directory+HGED_Result_file, "wb") as fp:
-        #     pickle.dump(targets, fp)
+        with ctx.Pool(processes=workers, initializer=_worker_init, initargs=(graphs, self.verbose)) as pool:
+            for pair, distance in pool.imap_unordered(_worker_compute, normalized_pairs):
+                results[pair] = distance
 
-        # with open(directory+indexes_file, "wb") as ind:
-        #     pickle.dump(index, ind)
+        with open(os.path.join('HGED_Result_Dapo/',self.HGED_Result_file), "wb") as result_fp:
+            pickle.dump(results, result_fp)
 
-    def harp_generate_hged(self, graphs_file:str, HGED_Result_file:str, log_file:str, indexes_file:str) -> None: 
-        if os.path.exists('HGED_Result_Harp'):
-            pass
-        else:
-            os.system("mkdir HGED_Result_Harp")
-        directory = "HGED_Result_Harp/"
-        fp = open(graphs_file, "rb")
-        graphs = pickle.load(fp)
-        print(len(graphs))
-        graph_idx = np.random.RandomState(0).randint(len(graphs) - 1, size=(28800, 2))
-        targets = []
-        index = []
+        index_output = [pair for pair in normalized_pairs if pair in results]
 
-        for i in range(0, 960):
-            processes = []
-            manager = Manager()
-            return_dict = manager.dict()
-
-            for left, right in graph_idx[i*30 : (i+1)*30]:
-                p = Process(target=self._compute_distance, args=(left, right, graphs, self._harp_node_substitute, self._harp_edge_substitute, return_dict))
-                p.start()
-                processes.append(p)
-
-            for p in processes:
-                p.join()
-
-            for key, distance in return_dict.items():
-                index.append((key[0], key[1]))
-                targets.append(distance)
-            
-        with open(directory+log_file, "w") as result:
-            for (left, right), distance in zip(index, targets):
-                print(f"{left}, {right} : {distance}", file=result)
-
-        with open(directory+HGED_Result_file, "wb") as fp:
-            pickle.dump(targets, fp)
-
-        with open(directory+indexes_file, "wb") as ind:
-            pickle.dump(index, ind)
-
+        with open(os.path.join('HGED_Result_Dapo/', self.indexes_file), "wb") as idx_out:
+            pickle.dump(index_output, idx_out)
+        
 def dapo_generate_hged(graphs_file: str, HGED_Result_file: str, log_file: str, indexes_file: str) -> None:
     """Standalone function to generate HGED results using DAPO method"""
     hged = HGED(graphs_file, HGED_Result_file, log_file, indexes_file)
     hged.dapo_generate_hged(graphs_file, HGED_Result_file, log_file, indexes_file)
 
-def harp_generate_hged(graphs_file: str, HGED_Result_file: str, log_file: str, indexes_file: str) -> None:
-    """Standalone function to generate HGED results using HARP method"""
-    hged = HGED(graphs_file, HGED_Result_file, log_file, indexes_file)
-    hged.harp_generate_hged(graphs_file, HGED_Result_file, log_file, indexes_file)
-
 if __name__ == "__main__":
-    # harp_generate_hged("/home/eeuser/Desktop/GRL-HLS/Program_Representation_Learning/graph_list.pkl", "Harp_HGED_Result.pkl", "Harp_log.txt", "Harp_indexes.pkl")
-    dapo_generate_hged("//Users/jinmingge/Documents/HKUST_MPHIL/GRL-HLS/GNNRL/GNN_Model/Graph_Dapo/graphs_random_dataset_networkx.pkl", "Dapo_HGED_Result.pkl", "Dapo_log.txt", "Dapo_indexes.pkl")
+    dapo_generate_hged("Graph_Dapo/graphs_random_dataset_networkx.pkl", "Dapo_HGED_Result.pkl", "Dapo_log.txt", "Dapo_indexes.pkl")

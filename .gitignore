@@ -1,3 +1,10 @@
 
 **/build
 **/Analysis_tools
+**/Graph_Dapo
+**/HGED_Result_Dapo
+**/losses
+**/models
+**/Raw_Graphs
+**/__pycache__
+**/Raw_IRs

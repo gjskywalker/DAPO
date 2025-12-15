@@ -205,12 +205,21 @@ public:
   HI_SeparateConstOffsetFromGEP(const char *Sep_Log_Name, bool LowerGEP = false, bool DEBUG = 0)
       : FunctionPass(ID), LowerGEP(LowerGEP), DEBUG(DEBUG)
   {
-    Sep_Log = new raw_fd_ostream(Sep_Log_Name, ErrInfo, sys::fs::OF_None);
+    if (this->DEBUG)
+    {
+      errs() << "HI_SeparateConstOffsetFromGEP: Debug Mode\n";
+      std::error_code ErrInfo;
+      this->Sep_Log = new raw_fd_ostream(Sep_Log_Name, ErrInfo, sys::fs::OF_None);
+    }
+    
   }
   ~HI_SeparateConstOffsetFromGEP()
   {
-    Sep_Log->flush();
-    delete Sep_Log;
+    if (this->DEBUG) {
+      this->Sep_Log->flush();
+      delete this->Sep_Log;
+    }
+    
   }
 
   void getAnalysisUsage(AnalysisUsage &AU) const override

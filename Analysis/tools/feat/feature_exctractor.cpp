@@ -124,7 +124,7 @@ int main(int argc, char **argv)
     print_info("Enable TargetIRAnalysis Pass");
 
     auto hi_separateconstoffsetfromgep =
-        new HI_SeparateConstOffsetFromGEP("HI_SeparateConstOffsetFromGEP", true);
+        new HI_SeparateConstOffsetFromGEP("HI_SeparateConstOffsetFromGEP", false);
     PM1.add(hi_separateconstoffsetfromgep);
     print_info("Enable HI_SeparateConstOffsetFromGEP Pass");
 
@@ -134,10 +134,11 @@ int main(int argc, char **argv)
 
     PM1.run(*Mod);
 
-    std::error_code EC;
-    llvm::raw_fd_ostream OS1("top_output0.bc", EC, llvm::sys::fs::OF_None);
-    WriteBitcodeToFile(*Mod, OS1);
-    OS1.flush();
+    // If debug
+    // std::error_code EC;
+    // llvm::raw_fd_ostream OS1("top_output0.bc", EC, llvm::sys::fs::OF_None);
+    // WriteBitcodeToFile(*Mod, OS1);
+    // OS1.flush();
 
     /*
         We use the following passes to create canonical loop form to simplify trip count analysis.
@@ -172,6 +173,7 @@ int main(int argc, char **argv)
     PM.add(loopinfowrapperpass);
     print_info("Enable LoopInfoWrapperPass Pass");
 
+    // If debug
     // auto regioninfopass = new RegionInfoPass();
     // PM.add(regioninfopass);
     // print_info("Enable RegionInfoPass Pass");
@@ -196,17 +198,19 @@ int main(int argc, char **argv)
     PM.add(scalarevolutionwrapperpass);
     print_info("Enable ScalarEvolutionWrapperPass Pass");
 
-    llvm::raw_fd_ostream OS2("top_output1.bc", EC, llvm::sys::fs::OF_None);
-    WriteBitcodeToFile(*Mod, OS2);
-    OS2.flush();
+    // llvm::raw_fd_ostream OS2("top_output1.bc", EC, llvm::sys::fs::OF_None);
+    // WriteBitcodeToFile(*Mod, OS2);
+    // OS2.flush();
 
     HI_feature_extractor *hi_feature_extractor = new HI_feature_extractor(pgm_name, path, true);
     PM.add(hi_feature_extractor);
     print_info("FeatureExtract BEGIN:");
     PM.run(*Mod);
     print_info("FeatureExtract END.");
-    llvm::raw_fd_ostream OS3("top_output.bc", EC, llvm::sys::fs::OF_None);
-    WriteBitcodeToFile(*Mod, OS3);
-    OS3.flush();
+    
+    // If Debug
+    // llvm::raw_fd_ostream OS3("top_output.bc", EC, llvm::sys::fs::OF_None);
+    // WriteBitcodeToFile(*Mod, OS3);
+    // OS3.flush();
     return 0;
 }

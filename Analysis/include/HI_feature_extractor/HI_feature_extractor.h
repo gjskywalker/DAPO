@@ -46,7 +46,7 @@ public:
         Node_Feature = new raw_fd_ostream(path+"/"+"Node_Feature_"+pgm_name+".csv", ErrInfo, llvm::sys::fs::OF_None);
         if (verbose)
         {
-            Inst_info = new raw_fd_ostream("Inst_Info_"+pgm_name+".csv", ErrInfo, llvm::sys::fs::OF_None);
+            Inst_info = new raw_fd_ostream(path+"/"+"Inst_Info_"+pgm_name+".csv", ErrInfo, llvm::sys::fs::OF_None);
         }
         BB_count = 0;
         inst_count = 0;

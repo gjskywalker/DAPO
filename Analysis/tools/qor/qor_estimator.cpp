@@ -237,7 +237,7 @@ int main(int argc, char **argv)
 
     auto hi_qor_estimator = new HI_qor_estimator(
         configFile_str.c_str(), "HI_qor_estimator", "BRAM_info",
-        top_str.c_str(), 0);
+        top_str.c_str(), 1);
     print_info("Enable HI_qor_estimator Pass");
     PM.add(hi_qor_estimator);
 
